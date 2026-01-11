@@ -1,6 +1,5 @@
 package com.github.ian4hu.mybatis.max
 
-import com.baomidou.mybatisplus.core.MybatisConfiguration
 import com.baomidou.mybatisplus.core.conditions.Helper
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper
 import com.baomidou.mybatisplus.core.conditions.query.Query
@@ -8,7 +7,6 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper
 import com.baomidou.mybatisplus.core.toolkit.Wrappers
 import com.baomidou.mybatisplus.extension.kotlin.KtQueryWrapper
 import com.github.ian4hu.mybatis.max.entity.BlockStorageDBO
-import com.github.ian4hu.mybatis.max.mapper.BlockStorageMapper
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Assertions.*
@@ -18,11 +16,10 @@ import kotlin.test.assertEquals
  * @author ian
  * @date 2026/01/07
  */
-internal class HelperTest {
+internal class HelperTest : MybatisBootstrap {
 
     @Test
     fun testColumn() {
-        MybatisConfiguration().addMapper(BlockStorageMapper::class.java)
 
         for (wrapper in arrayOf(
             Wrappers.query(BlockStorageDBO::class.java),
@@ -49,7 +46,6 @@ internal class HelperTest {
 
     @Test
     fun testSqlSelect() {
-        MybatisConfiguration().addMapper(BlockStorageMapper::class.java)
 
         val wrappers = mutableSetOf<Query<*, *, *>>().apply {
             val ktQueryWrapper = KtQueryWrapper(BlockStorageDBO::class.java)

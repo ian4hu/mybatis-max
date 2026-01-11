@@ -1,11 +1,14 @@
 package com.github.ian4hu.mybatis.max
 
-import com.baomidou.mybatisplus.core.MybatisConfiguration
 import com.baomidou.mybatisplus.core.conditions.AbstractWrapper
 import com.baomidou.mybatisplus.core.toolkit.Wrappers
 import com.baomidou.mybatisplus.extension.kotlin.KtQueryWrapper
+import com.github.ian4hu.mybatis.max.Expr.Companion.and
+import com.github.ian4hu.mybatis.max.Expr.Companion.or
+import com.github.ian4hu.mybatis.max.Expr.Companion.not
+import com.github.ian4hu.mybatis.max.Expr.Companion.literal
+import com.github.ian4hu.mybatis.max.AndExpr
 import com.github.ian4hu.mybatis.max.entity.BlockStorageDBO
-import com.github.ian4hu.mybatis.max.mapper.BlockStorageMapper
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -21,10 +24,9 @@ import kotlin.test.assertEquals
 import kotlin.to
 
 
-class ExprTest {
+class ExprTest : MybatisBootstrap {
     @Test
     fun render() {
-        MybatisConfiguration().addMapper(BlockStorageMapper::class.java)
         val wrapper = Wrappers.query<Any>()
         val concat = Expr.functionCall("concat", "A", "B", "C", null).render(wrapper)
         Assertions.assertEquals(
@@ -41,12 +43,12 @@ class ExprTest {
 
         val functionCall = Expr.functionCall(
             "wm_concat",
-            Expr.Companion.constant(1),
-            Expr.Companion.lambda(JavaHelperTest.metadata()),
-            Expr.Companion.constant(true), Expr.Companion.constant("A"),
-            Expr.Companion.kotlinProperty(BlockStorageDBO::id),
-            Expr.Companion.column("out_biz_id"),
-            Expr.Companion.constant(null),
+            Expr.constant(1),
+            Expr.lambda(JavaHelperTest.metadata()),
+            Expr.constant(true), Expr.constant("A"),
+            Expr.kotlinProperty(BlockStorageDBO::id),
+            Expr.column("out_biz_id"),
+            Expr.constant(null),
             Constant(Double.valueOf("10"))
         )
         val wmConcat = functionCall.render(Wrappers.query<Any>())
@@ -59,18 +61,18 @@ class ExprTest {
 
     @Test
     fun composite() {
-        val andExpr = Expr.and(
-            Expr.Companion.literal("A").and(Expr.Companion.literal("A")),
-            Expr.Companion.literal("B"),
-            Expr.Companion.literal("C")
+        val andExpr = and(
+            literal("A").and(literal("A")),
+            literal("B"),
+            literal("C")
         )
-        val orExpr = Expr.or(
-            Expr.Companion.literal("C").or(Expr.Companion.literal("C")),
-            Expr.Companion.literal("D"),
-            Expr.Companion.literal("E")
+        val orExpr = or(
+            literal("C").or(literal("C")),
+            literal("D"),
+            literal("E")
         )
 
-        val expr = Expr.not(Expr.and(andExpr, andExpr, Expr.or(orExpr, orExpr, andExpr))).not().not()
+        val expr = not(and(andExpr, andExpr, or(orExpr, orExpr, andExpr))).not().not()
 
         val exprStr = expr.render(Wrappers.query<Any>())
         Assertions.assertEquals("NOT (A AND B AND C AND (C OR D OR E OR (A AND B AND C)))", exprStr)
@@ -82,8 +84,6 @@ class ExprTest {
 
         @JvmStatic
         fun wrappersProvider(): Stream<Arguments> {
-            MybatisConfiguration().addMapper(BlockStorageMapper::class.java)
-
             return Stream.of(
                 "QueryWrapper" to Wrappers.query<Any>(),
                 "LambdaQueryWrapper" to Wrappers.lambdaQuery(),
@@ -94,12 +94,35 @@ class ExprTest {
         @JvmStatic
         fun functionCallProvider() : Stream<Arguments> {
             return Stream.of(
-                Arguments.of("concat", listOf(Expr.literal("id"), Expr.variable("p0")), "concat(id,#{ew.paramNameValuePairs.MPGENVAL1})"),
+                Arguments.of("concat", listOf(literal("id"), Expr.variable("p0")), "concat(id,#{ew.paramNameValuePairs.MPGENVAL1})"),
                 Arguments.of("current_timestamp", listOf(Expr.constant(6)), "current_timestamp(6)"),
                 Arguments.of("wm_concat", listOf(",", Expr.column("id")), "wm_concat(#{ew.paramNameValuePairs.MPGENVAL1},id)")
             ).flatMap { fn ->
                 wrappersProvider().map { Arguments.of("${fn.get()[0]} - ${it.get()[0]}",*it.get().drop(1).toTypedArray(), *fn.get()) }
             }
+        }
+
+        @JvmStatic
+        fun exprTestSource() : Stream<Arguments> {
+            return Stream.of(
+                Arguments.of(and(literal("A"), literal("B"), literal("C")), "A AND B AND C"),
+                Arguments.of(or(literal("A"), literal("B"), literal("C")), "A OR B OR C"),
+                Arguments.of(not(or(literal("A"), literal("B"), literal("C"))), "NOT (A OR B OR C)"),
+                Arguments.of(not(not(literal("A"))), "A"),
+                Arguments.of(not(literal("A")), "NOT A"),
+                Arguments.of(and(and(literal("A"), literal("B")),and(literal("B"),literal("C"))), "A AND B AND C"),
+                Arguments.of(AndExpr<Any>(listOf(and(literal("A"), literal("B")), and(literal("B"), literal("C")))), "A AND B AND B AND C"),
+                Arguments.of(or(or(literal("A"), literal("B")),or(literal("B"),literal("C"))), "A OR B OR C"),
+                Arguments.of(OrExpr<Any>(listOf(or(literal("A"), literal("B")),or(literal("B"),literal("C")))), "A OR B OR B OR C"),
+                Arguments.of(and(or(literal("A"), literal("B")),or(literal("B"),literal("C"))), "(A OR B) AND (B OR C)"),
+                Arguments.of(and(not(or(literal("A"), literal("B"))),or(literal("B"),literal("C"))), "(NOT (A OR B)) AND (B OR C)"),
+                Arguments.of(or(and(literal("A"), literal("B")),and(literal("B"),literal("C"))), "(A AND B) OR (B AND C)"),
+                Arguments.of(or(not(and(literal("A"), literal("B"))),and(literal("B"),literal("C"))), "(NOT (A AND B)) OR (B AND C)"),
+
+                )
+                .flatMap { expr ->
+                    wrappersProvider().map { Arguments.of("${expr.get()[0].javaClass.simpleName} - ${it.get()[0]}", *it.get().drop(1).toTypedArray(), *expr.get()) }
+                }
         }
     }
 
@@ -123,7 +146,7 @@ class ExprTest {
     @MethodSource("wrappersProvider")
     fun testLiteral(name: String, wrapper: AbstractWrapper<*, *, *>) {
         val literal = "current_timestamp"
-        val result = Expr.literal(literal).render(wrapper)
+        val result = literal(literal).render(wrapper)
         assertEquals(literal, result)
     }
 
@@ -148,5 +171,12 @@ class ExprTest {
             Expr.functionCall("fn", Expr.column("name").alias("nick"))
         }
         assertEquals("Function parameter #0: Alias can not as function parameter.", exception.message)
+    }
+
+    @ParameterizedTest
+    @MethodSource("exprTestSource")
+    fun testLogicOperator(name: String, wrapper: AbstractWrapper<*, *, *>, expr: Expr<*>, expected: String) {
+        val result = expr.render(wrapper)
+        assertEquals(expected, result)
     }
 }

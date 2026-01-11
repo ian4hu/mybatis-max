@@ -1,12 +1,9 @@
 package com.github.ian4hu.mybatis.max;
 
-import com.baomidou.mybatisplus.core.MybatisConfiguration;
 import com.baomidou.mybatisplus.core.conditions.AbstractWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.github.ian4hu.mybatis.max.entity.BlockStorageDBO;
-import com.github.ian4hu.mybatis.max.mapper.BlockStorageMapper;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -17,7 +14,7 @@ import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class JavaExprTest {
+public class JavaExprTest implements MybatisBootstrap {
     @Test
     public void testPrimitiveConstant() {
         Map<Object, String> map = new HashMap<>();
@@ -47,7 +44,6 @@ public class JavaExprTest {
 
     @Test
     public void testLambda() {
-        new MybatisConfiguration().addMapper(BlockStorageMapper.class);
         List<Supplier<AbstractWrapper<?,?,?>>> wrappers = Arrays.asList(Wrappers::query, () -> Wrappers.lambdaQuery(BlockStorageDBO.class));
         for (Supplier<AbstractWrapper<?,?,?>> wrapper : wrappers) {
             String result = Expr.lambda(BlockStorageDBO::getOutBizId).render(wrapper.get());
