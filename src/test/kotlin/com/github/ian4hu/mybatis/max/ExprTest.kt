@@ -8,12 +8,18 @@ import com.github.ian4hu.mybatis.max.Expr.Companion.or
 import com.github.ian4hu.mybatis.max.Expr.Companion.not
 import com.github.ian4hu.mybatis.max.Expr.Companion.literal
 import com.github.ian4hu.mybatis.max.AndExpr
+import com.github.ian4hu.mybatis.max.Expr.Companion.column
+import com.github.ian4hu.mybatis.max.Expr.Companion.constant
+import com.github.ian4hu.mybatis.max.Expr.Companion.functionCall
+import com.github.ian4hu.mybatis.max.Expr.Companion.kotlinProperty
+import com.github.ian4hu.mybatis.max.Expr.Companion.lambda
 import com.github.ian4hu.mybatis.max.entity.BlockStorageDBO
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.Arguments.of
 import org.junit.jupiter.params.provider.MethodSource
 import java.lang.Double
 import java.util.stream.Stream
@@ -88,40 +94,46 @@ class ExprTest : MybatisBootstrap {
                 "QueryWrapper" to Wrappers.query<Any>(),
                 "LambdaQueryWrapper" to Wrappers.lambdaQuery(),
                 "KtQueryWrapper" to KtQueryWrapper(BlockStorageDBO::class.java),
-            ).map { Arguments.of(it.first, it.second) }
+            ).map { of(it.first, it.second) }
         }
 
         @JvmStatic
         fun functionCallProvider() : Stream<Arguments> {
             return Stream.of(
-                Arguments.of("concat", listOf(literal("id"), Expr.variable("p0")), "concat(id,#{ew.paramNameValuePairs.MPGENVAL1})"),
-                Arguments.of("current_timestamp", listOf(Expr.constant(6)), "current_timestamp(6)"),
-                Arguments.of("wm_concat", listOf(",", Expr.column("id")), "wm_concat(#{ew.paramNameValuePairs.MPGENVAL1},id)")
+                of("concat", listOf(literal("id"), Expr.variable("p0")), "concat(id,#{ew.paramNameValuePairs.MPGENVAL1})"),
+                of("current_timestamp", listOf(Expr.constant(6)), "current_timestamp(6)"),
+                of("wm_concat", listOf(",", Expr.column("id")), "wm_concat(#{ew.paramNameValuePairs.MPGENVAL1},id)")
             ).flatMap { fn ->
-                wrappersProvider().map { Arguments.of("${fn.get()[0]} - ${it.get()[0]}",*it.get().drop(1).toTypedArray(), *fn.get()) }
+                wrappersProvider().map { of("${fn.get()[0]} - ${it.get()[0]}",*it.get().drop(1).toTypedArray(), *fn.get()) }
             }
         }
 
         @JvmStatic
         fun exprTestSource() : Stream<Arguments> {
             return Stream.of(
-                Arguments.of(and(literal("A"), literal("B"), literal("C")), "A AND B AND C"),
-                Arguments.of(or(literal("A"), literal("B"), literal("C")), "A OR B OR C"),
-                Arguments.of(not(or(literal("A"), literal("B"), literal("C"))), "NOT (A OR B OR C)"),
-                Arguments.of(not(not(literal("A"))), "A"),
-                Arguments.of(not(literal("A")), "NOT A"),
-                Arguments.of(and(and(literal("A"), literal("B")),and(literal("B"),literal("C"))), "A AND B AND C"),
-                Arguments.of(AndExpr<Any>(listOf(and(literal("A"), literal("B")), and(literal("B"), literal("C")))), "A AND B AND B AND C"),
-                Arguments.of(or(or(literal("A"), literal("B")),or(literal("B"),literal("C"))), "A OR B OR C"),
-                Arguments.of(OrExpr<Any>(listOf(or(literal("A"), literal("B")),or(literal("B"),literal("C")))), "A OR B OR B OR C"),
-                Arguments.of(and(or(literal("A"), literal("B")),or(literal("B"),literal("C"))), "(A OR B) AND (B OR C)"),
-                Arguments.of(and(not(or(literal("A"), literal("B"))),or(literal("B"),literal("C"))), "(NOT (A OR B)) AND (B OR C)"),
-                Arguments.of(or(and(literal("A"), literal("B")),and(literal("B"),literal("C"))), "(A AND B) OR (B AND C)"),
-                Arguments.of(or(not(and(literal("A"), literal("B"))),and(literal("B"),literal("C"))), "(NOT (A AND B)) OR (B AND C)"),
-
+                of(and(literal("A"), literal("B"), literal("C")), "A AND B AND C"),
+                of(or(literal("A"), literal("B"), literal("C")), "A OR B OR C"),
+                of(not(or(literal("A"), literal("B"), literal("C"))), "NOT (A OR B OR C)"),
+                of(not(not(literal("A"))), "A"),
+                of(not(literal("A")), "NOT A"),
+                of(and(and(literal("A"), literal("B")),and(literal("B"),literal("C"))), "A AND B AND C"),
+                of(AndExpr<Any>(listOf(and(literal("A"), literal("B")), and(literal("B"), literal("C")))), "A AND B AND B AND C"),
+                of(or(or(literal("A"), literal("B")),or(literal("B"),literal("C"))), "A OR B OR C"),
+                of(OrExpr<Any>(listOf(or(literal("A"), literal("B")),or(literal("B"),literal("C")))), "A OR B OR B OR C"),
+                of(and(or(literal("A"), literal("B")),or(literal("B"),literal("C"))), "(A OR B) AND (B OR C)"),
+                of(and(not(or(literal("A"), literal("B"))),or(literal("B"),literal("C"))), "(NOT (A OR B)) AND (B OR C)"),
+                of(or(and(literal("A"), literal("B")),and(literal("B"),literal("C"))), "(A AND B) OR (B AND C)"),
+                of(or(not(and(literal("A"), literal("B"))),and(literal("B"),literal("C"))), "(NOT (A AND B)) OR (B AND C)"),
+                of(lambda(JavaHelperTest.metadata()), "metadata"),
+                of(kotlinProperty(BlockStorageDBO::outBizId), "out_biz_id"),
+                of(functionCall("concat", literal("A"), literal("B")), "concat(A,B)"),
+                of(column("id").alias("aid"), "id AS aid"),
+                of(column("id").alias("aid").alias("bid"), "id AS bid"),
+                of(column("id").alias("aid").alias(""), "id"),
+                of(constant(1.toShort()).alias("aid"), "1 AS aid"),
                 )
                 .flatMap { expr ->
-                    wrappersProvider().map { Arguments.of("${expr.get()[0].javaClass.simpleName} - ${it.get()[0]}", *it.get().drop(1).toTypedArray(), *expr.get()) }
+                    wrappersProvider().map { of("${expr.get()[0].javaClass.simpleName} - ${it.get()[0]}", *it.get().drop(1).toTypedArray(), *expr.get()) }
                 }
         }
     }
@@ -175,7 +187,7 @@ class ExprTest : MybatisBootstrap {
 
     @ParameterizedTest
     @MethodSource("exprTestSource")
-    fun testLogicOperator(name: String, wrapper: AbstractWrapper<*, *, *>, expr: Expr<*>, expected: String) {
+    fun testLogicOperator(name: String, wrapper: AbstractWrapper<*, *, *>, expr: Renderable<*>, expected: String) {
         val result = expr.render(wrapper)
         assertEquals(expected, result)
     }

@@ -40,18 +40,28 @@ interface Expr<T>: Renderable<T> {
         fun <T> kotlinProperty(value: KProperty1<T, *>, entityClass: Class<T>): Expr<KProperty1<T, *>> =
             KotlinPropertyExpr(value, entityClass)
 
+        @JvmStatic
         fun literal(value: String): Expr<String> = LiteralExpr(value)
 
         @JvmStatic
         fun constant(value: Any?): Expr<*> = Constant(value)
+
+        @JvmStatic
         fun variable(value: Any?, mapping: String? = null): Expr<*> = VariableExpr(value, mapping)
+
+        @JvmStatic
         fun functionCall(fn: String, vararg args: Any?): Expr<*> = FunctionCallExpr(fn, *args.mapIndexed { index, it ->
             if (it is Alias<*>) throw IllegalArgumentException("Function parameter #$index: Alias can not as function parameter.")
             it as? Expr<*> ?: variable(it)
         }.toTypedArray())
 
+        @JvmStatic
         fun and(a: Expr<*>, b: Expr<*>, vararg others: Expr<*>): Expr<*> = a.and(b, *others)
+
+        @JvmStatic
         fun or(a: Expr<*>, b: Expr<*>, vararg others: Expr<*>): Expr<*> = a.or(b, *others)
+
+        @JvmStatic
         fun not(a: Expr<*>): Expr<*> = a.not()
     }
 
