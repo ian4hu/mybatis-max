@@ -64,8 +64,7 @@ interface Expr<T> : Renderable<T> {
          * @param value the lambda method reference
          * @return an expression representing the column derived from the lambda
          */
-        @JvmStatic
-        fun <I, O> lambda(value: SFunction<I, O>): Expr<SFunction<*, *>> = LambdaExpr<I, O>(value)
+        @JvmStatic fun <I, O> lambda(value: SFunction<I, O>): Expr<SFunction<*, *>> = LambdaExpr<I, O>(value)
 
         /**
          * Creates a column reference expression from a Kotlin property reference with reified type.
