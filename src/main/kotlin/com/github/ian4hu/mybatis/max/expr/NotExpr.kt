@@ -18,8 +18,13 @@ package com.github.ian4hu.mybatis.max.expr
 import com.baomidou.mybatisplus.core.conditions.AbstractWrapper
 import com.github.ian4hu.mybatis.max.Expr
 
-data class NotExpr(
+@ConsistentCopyVisibility
+data class NotExpr private constructor(
     val expr: Expr,
 ) : CompositeExpr {
     override fun render(wrapper: AbstractWrapper<*, *, *>): String = if (expr is CompositeExpr) "NOT (${expr.render(wrapper)})" else "NOT ${expr.render(wrapper)}"
+
+    companion object {
+        fun of(expr: Expr): Expr = if (expr is NotExpr) expr.expr else NotExpr(expr)
+    }
 }

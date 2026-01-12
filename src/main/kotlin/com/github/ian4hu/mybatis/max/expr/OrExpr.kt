@@ -18,14 +18,26 @@ package com.github.ian4hu.mybatis.max.expr
 import com.baomidou.mybatisplus.core.conditions.AbstractWrapper
 import com.github.ian4hu.mybatis.max.Expr
 
-data class OrExpr(
+@ConsistentCopyVisibility
+data class OrExpr private constructor(
     val elements: List<Expr>,
 ) : CompositeExpr {
-    override fun render(wrapper: AbstractWrapper<*, *, *>): String = elements.distinct().joinToString(" OR ") {
+    override fun render(wrapper: AbstractWrapper<*, *, *>): String = elements.joinToString(" OR ") {
         if (it is CompositeExpr && it !is OrExpr) {
             "(${it.render(wrapper)})"
         } else {
             it.render(wrapper)
+        }
+    }
+
+    companion object {
+        fun of(a: Expr, b: Expr, vararg expr: Expr): Expr {
+            val elements = arrayOf(a, b, *expr)
+                .flatMap { if (it is OrExpr) it.elements else listOf(it) }.distinct()
+            if (elements.size == 1) {
+                return elements[0]
+            }
+            return OrExpr(elements)
         }
     }
 }

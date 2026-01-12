@@ -64,7 +64,7 @@ interface Expr : Renderable {
          * @param value the lambda method reference
          * @return an expression representing the column derived from the lambda
          */
-        @JvmStatic fun <I: Any, O> lambda(value: SFunction<I, O>): Expr = LambdaExpr(value)
+        @JvmStatic fun <I : Any, O> lambda(value: SFunction<I, O>): Expr = LambdaExpr(value)
 
         /**
          * Creates a column reference expression from a Kotlin property reference with reified type.
@@ -160,7 +160,7 @@ interface Expr : Renderable {
                             "Function parameter #$index: Alias can not as function parameter.",
                         )
                     }
-                    it as? Expr?: variable(it)
+                    it as? Expr ?: variable(it)
                 }.toTypedArray(),
         )
 
@@ -210,14 +210,7 @@ interface Expr : Renderable {
      * @param expr additional expressions to combine with this one
      * @return a composite AND expression, or a single expression if only one remains
      */
-    fun and(vararg expr: Expr): Expr {
-        val elements =
-            listOf(this, *expr).flatMap { if (it is AndExpr) it.elements else listOf(it) }.distinct()
-        if (elements.size == 1) {
-            return elements[0]
-        }
-        return AndExpr.of(*elements.toTypedArray())
-    }
+    fun and(b: Expr, vararg expr: Expr): Expr = AndExpr.of(this, b, *expr)
 
     /**
      * Combines this expression with others using the OR logical operator.
@@ -228,14 +221,7 @@ interface Expr : Renderable {
      * @param expr additional expressions to combine with this one
      * @return a composite OR expression, or a single expression if only one remains
      */
-    fun or(vararg expr: Expr): Expr {
-        val elements =
-            listOf(this, *expr).flatMap { if (it is OrExpr) it.elements else listOf(it) }.distinct()
-        if (elements.size == 1) {
-            return elements[0]
-        }
-        return OrExpr(elements)
-    }
+    fun or(b: Expr, vararg expr: Expr): Expr = OrExpr.of(this, b, *expr)
 
     /**
      * Negates this expression using the NOT logical operator.
@@ -244,5 +230,5 @@ interface Expr : Renderable {
      *
      * @return a NOT expression, or the original expression if this is already a NOT expression
      */
-    fun not(): Expr = if (this is NotExpr) this.expr else NotExpr(this)
+    fun not(): Expr = NotExpr.of(this)
 }

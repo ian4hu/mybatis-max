@@ -139,17 +139,19 @@ class ExprTest : MybatisBootstrap {
                     "A AND B AND C",
                 ),
                 of(
-                    AndExpr(
-                        listOf(and(literal("A"), literal("B")), and(literal("B"), literal("C"))),
+                    AndExpr.of(
+                        and(literal("A"), literal("B")),
+                        and(literal("B"), literal("C")),
                     ),
-                    "A AND B AND B AND C",
+                    "A AND B AND C",
                 ),
                 of(or(or(literal("A"), literal("B")), or(literal("B"), literal("C"))), "A OR B OR C"),
                 of(
-                    OrExpr(
-                        listOf(or(literal("A"), literal("B")), or(literal("B"), literal("C"))),
+                    OrExpr.of(
+                        or(literal("A"), literal("B")),
+                        or(literal("B"), literal("C")),
                     ),
-                    "A OR B OR B OR C",
+                    "A OR B OR C",
                 ),
                 of(
                     and(or(literal("A"), literal("B")), or(literal("B"), literal("C"))),
