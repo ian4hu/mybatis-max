@@ -3,6 +3,7 @@ import org.jetbrains.kotlin.gradle.dsl.jvm.JvmTargetValidationMode
 
 plugins {
     kotlin("jvm") version "2.2.21"
+    id("com.diffplug.spotless") version "8.1.0"
 }
 
 group = "com.github.ian4hu"
@@ -32,6 +33,19 @@ java {
         languageVersion.set(JavaLanguageVersion.of(17))
         targetCompatibility = JavaVersion.VERSION_1_9
         sourceCompatibility = JavaVersion.VERSION_1_9
+    }
+}
+
+spotless {
+    ratchetFrom("origin/main")
+    encoding("UTF-8")
+
+    java {
+        importOrder("java", "javax", "com", "org")
+		eclipse().configFile(rootProject.file("eclipse-format-file.xml"))
+		trimTrailingWhitespace()
+        formatAnnotations()
+        licenseHeaderFile(rootProject.file("LICENSE_HEADER"))
     }
 }
 
