@@ -47,6 +47,12 @@ spotless {
         formatAnnotations()
         licenseHeaderFile(rootProject.file("LICENSE_HEADER"))
     }
+
+    kotlin {
+        ktfmt()
+        licenseHeaderFile(rootProject.file("LICENSE_HEADER"))
+        trimTrailingWhitespace()
+    }
 }
 
 tasks.compileKotlin {

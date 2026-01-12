@@ -1,3 +1,18 @@
+/*
+ *    Copyright 2026 the original author or authors.
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *       https://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
 package com.github.ian4hu.mybatis.max
 
 import com.baomidou.mybatisplus.core.conditions.Helper
@@ -7,10 +22,10 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper
 import com.baomidou.mybatisplus.core.toolkit.Wrappers
 import com.baomidou.mybatisplus.extension.kotlin.KtQueryWrapper
 import com.github.ian4hu.mybatis.max.entity.BlockStorageDBO
-import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.Assertions.*
 import kotlin.test.assertEquals
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Test
 
 /**
  * @author ian
@@ -18,53 +33,54 @@ import kotlin.test.assertEquals
  */
 internal class HelperTest : MybatisBootstrap {
 
-    @Test
-    fun testColumn() {
+  @Test
+  fun testColumn() {
 
-        for (wrapper in arrayOf(
+    for (wrapper in
+        arrayOf(
             Wrappers.query(BlockStorageDBO::class.java),
             Wrappers.lambdaQuery(BlockStorageDBO::class.java),
-            KtQueryWrapper(BlockStorageDBO())
+            KtQueryWrapper(BlockStorageDBO()),
         )) {
-            val wrapColumn = Helper.wrapColumn(wrapper, "name")
-            assertEquals("name", wrapColumn);
+      val wrapColumn = Helper.wrapColumn(wrapper, "name")
+      assertEquals("name", wrapColumn)
 
-            val wrapLambda = Helper.wrapLambda(wrapper, JavaHelperTest.metadata())
-            assertEquals("metadata", wrapLambda)
+      val wrapLambda = Helper.wrapLambda(wrapper, JavaHelperTest.metadata())
+      assertEquals("metadata", wrapLambda)
 
-            val wrapProp = Helper.wrapProperty(wrapper, BlockStorageDBO::buffer)
-            assertEquals("buffer", wrapProp)
+      val wrapProp = Helper.wrapProperty(wrapper, BlockStorageDBO::buffer)
+      assertEquals("buffer", wrapProp)
 
-            val param = Helper.wrapParam(wrapper, "A", null)
-            val paramNameValuePairs = wrapper.getParamNameValuePairs()
-            Assertions.assertFalse(paramNameValuePairs.isEmpty())
-            assertEquals("#{ew.paramNameValuePairs.MPGENVAL1}", param)
-            assertEquals("A", paramNameValuePairs.get("MPGENVAL1"))
-        }
-
+      val param = Helper.wrapParam(wrapper, "A", null)
+      val paramNameValuePairs = wrapper.getParamNameValuePairs()
+      Assertions.assertFalse(paramNameValuePairs.isEmpty())
+      assertEquals("#{ew.paramNameValuePairs.MPGENVAL1}", param)
+      assertEquals("A", paramNameValuePairs.get("MPGENVAL1"))
     }
+  }
 
-    @Test
-    fun testSqlSelect() {
+  @Test
+  fun testSqlSelect() {
 
-        val wrappers = mutableSetOf<Query<*, *, *>>().apply {
-            val ktQueryWrapper = KtQueryWrapper(BlockStorageDBO::class.java)
-            ktQueryWrapper.select(BlockStorageDBO::metadata)
-            add(ktQueryWrapper)
+    val wrappers =
+        mutableSetOf<Query<*, *, *>>().apply {
+          val ktQueryWrapper = KtQueryWrapper(BlockStorageDBO::class.java)
+          ktQueryWrapper.select(BlockStorageDBO::metadata)
+          add(ktQueryWrapper)
 
-            val lambdaQueryWrapper = LambdaQueryWrapper<BlockStorageDBO>()
-            lambdaQueryWrapper.select(JavaHelperTest.metadata())
-            add(lambdaQueryWrapper)
+          val lambdaQueryWrapper = LambdaQueryWrapper<BlockStorageDBO>()
+          lambdaQueryWrapper.select(JavaHelperTest.metadata())
+          add(lambdaQueryWrapper)
 
-            val queryWrapper = QueryWrapper<BlockStorageDBO>()
-            queryWrapper.select("metadata")
-            add(queryWrapper)
+          val queryWrapper = QueryWrapper<BlockStorageDBO>()
+          queryWrapper.select("metadata")
+          add(queryWrapper)
         }
 
-        for (wrapper in wrappers) {
-            val sqlSelect = Helper.getSqlSelect(wrapper)
-            assertNotNull(sqlSelect)
-            assertEquals("metadata", sqlSelect.stringValue)
-        }
+    for (wrapper in wrappers) {
+      val sqlSelect = Helper.getSqlSelect(wrapper)
+      assertNotNull(sqlSelect)
+      assertEquals("metadata", sqlSelect.stringValue)
     }
+  }
 }
