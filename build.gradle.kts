@@ -37,7 +37,7 @@ java {
 }
 
 spotless {
-    // ratchetFrom("origin/main")
+    ratchetFrom("origin/main")
     encoding("UTF-8")
 
     java {
