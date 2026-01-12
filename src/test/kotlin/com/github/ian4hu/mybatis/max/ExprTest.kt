@@ -17,7 +17,6 @@ package com.github.ian4hu.mybatis.max
 
 import com.baomidou.mybatisplus.core.conditions.AbstractWrapper
 import com.baomidou.mybatisplus.core.toolkit.Wrappers
-import com.baomidou.mybatisplus.extension.handlers.FastjsonTypeHandler
 import com.baomidou.mybatisplus.extension.kotlin.KtQueryWrapper
 import com.github.ian4hu.mybatis.max.Expr.Companion.and
 import com.github.ian4hu.mybatis.max.Expr.Companion.column
@@ -179,7 +178,7 @@ class ExprTest : MybatisBootstrap {
                 of(column("id").alias("aid").alias("bid"), "id AS bid"),
                 of(column("id").alias("aid").alias(""), "id"),
                 of(constant(1.toShort()).alias("aid"), "1 AS aid"),
-                of(and(literal("+1"),literal("-1"), literal("TRUE"), literal("NULL")), "+1 AND -1 AND TRUE AND NULL")
+                of(and(literal("+1"), literal("-1"), literal("TRUE"), literal("NULL")), "+1 AND -1 AND TRUE AND NULL"),
             ).flatMap { expr ->
                 wrappersProvider().map {
                     of(
@@ -250,8 +249,8 @@ class ExprTest : MybatisBootstrap {
             .jdbcType("BIGINT")
             .javaType(Long::class.java)
             .typeHandler(BigIntegerTypeHandler::class.java)
-            .OUT()
-            .IN()
+            .modeOut()
+            .modeIn()
             .numericScale(6)
             .render(wrapper)
         assertEquals("#{ew.paramNameValuePairs.MPGENVAL3,jdbcType=BIGINT,javaType=long,typeHandler=org.apache.ibatis.type.BigIntegerTypeHandler,mode=IN,numericScale=6}", varWithMapping)

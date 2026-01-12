@@ -36,6 +36,7 @@ data class VariableExpr(
 ) : Expr {
     /** Secondary constructor for backward compatibility with string-based mapping. */
     constructor(value: Any?, mapping: String?) : this(value, parseMapping(mapping))
+
     /**
      * Renders this variable as a MyBatis parameter placeholder.
      *
@@ -46,22 +47,22 @@ data class VariableExpr(
 
     /** Configures JDBC type for this parameter. */
     fun jdbcType(jdbcType: String) = mapping("jdbcType" to jdbcType)
-    
+
     /** Configures Java type for this parameter. */
     fun javaType(javaType: Class<*>) = mapping("javaType" to javaType.name)
-    
+
     /** Configures parameter mode (IN, OUT, INOUT). */
     fun mode(mode: String) = mapping("mode" to mode)
-    
+
     /** Sets parameter mode to IN. */
-    fun IN() = mode("IN")
-    
+    fun modeIn() = mode("IN")
+
     /** Sets parameter mode to OUT. */
-    fun OUT() = mode("OUT")
-    
+    fun modeOut() = mode("OUT")
+
     /** Configures numeric scale for decimal parameters. */
     fun numericScale(scale: Int) = mapping("numericScale" to scale.toString())
-    
+
     /** Configures custom type handler for this parameter. */
     fun typeHandler(typeHandler: Class<*>) = mapping("typeHandler" to typeHandler.name)
 
@@ -70,12 +71,10 @@ data class VariableExpr(
 
     companion object {
         /** Parses string mapping (e.g., "jdbcType=VARCHAR,mode=IN") into a map. */
-        private fun parseMapping(mapping: String?): Map<String, String> {
-            return mapping?.splitToSequence(',').orEmpty()
-                .map { it.split('=',limit = 2) }
-                .map { it[0].trim() to it[1].trim() }
-                .toMap()
-        }
+        private fun parseMapping(mapping: String?): Map<String, String> = mapping?.splitToSequence(',').orEmpty()
+            .map { it.split('=', limit = 2) }
+            .map { it[0].trim() to it[1].trim() }
+            .toMap()
 
         /** Formats mapping map back to string for MyBatis. */
         private fun formatMapping(mapping: Map<String, String>): String? {
