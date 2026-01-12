@@ -19,7 +19,7 @@ import com.baomidou.mybatisplus.core.toolkit.support.SFunction
 import com.github.ian4hu.mybatis.max.expr.Alias
 import com.github.ian4hu.mybatis.max.expr.AndExpr
 import com.github.ian4hu.mybatis.max.expr.ColumnExpr
-import com.github.ian4hu.mybatis.max.expr.Constant
+import com.github.ian4hu.mybatis.max.expr.ConstantExpr
 import com.github.ian4hu.mybatis.max.expr.FunctionCallExpr
 import com.github.ian4hu.mybatis.max.expr.KotlinPropertyExpr
 import com.github.ian4hu.mybatis.max.expr.LambdaExpr
@@ -93,19 +93,28 @@ interface Expr<T> : Renderable<T> {
         /**
          * Creates a literal expression that renders directly into SQL without escaping or quoting.
          *
-         * Literals are validated against [LiteralExpr.LITERAL_REGEX] to ensure they contain only
-         * safe SQL identifiers (alphanumeric characters and underscores, starting with a letter or underscore).
-         * This validation prevents SQL injection attacks by rejecting potentially dangerous characters.
+         * Literals are validated to ensure they contain only safe SQL values. Accepted literal types:
+         * - **SQL identifiers**: Column names, table names, or keywords (e.g., `user_name`, `COUNT`, `NULL`)
+         * - **Numeric values**: Integers, decimals, or scientific notation (e.g., `42`, `3.14`, `1.23E10`)
+         * - **Boolean values**: `true` or `false` (case-insensitive)
          *
-         * **Valid examples**: `user_name`, `COUNT`, `table1`, `_temp`
+         * This validation prevents SQL injection attacks by rejecting potentially dangerous characters
+         * and ensuring only recognized literal patterns are accepted.
          *
-         * **Invalid examples**: `user-name`, `1user`, `user name`, `user;DROP`
+         * **Valid examples**: `user_name`, `COUNT`, `42`, `3.14`, `true`, `NULL`
          *
-         * @param value the raw SQL literal string (must match the identifier pattern)
+         * **Invalid examples**: `user-name`, `1user`, `user name`, `user;DROP`, `'string'`
+         *
+         * @param value the raw SQL literal string (must match a safe literal pattern)
          * @return an expression that renders as-is in SQL
-         * @throws IllegalArgumentException if the value contains invalid characters or doesn't match the safe identifier pattern
+         * @throws IllegalArgumentException if the value doesn't match any safe literal pattern
          */
-        @JvmStatic fun literal(value: String): Expr<String> = if (value.matches(LiteralExpr.LITERAL_REGEX)) LiteralExpr(value) else throw IllegalArgumentException("'$value>' is not a valid literal")
+        @JvmStatic fun literal(value: String): Expr<String> =
+            if (LiteralExpr.isSafeLiteral(value)) {
+                LiteralExpr(value)
+            } else {
+                throw IllegalArgumentException("'$value' is not a valid literal. Only SQL identifiers, numbers, and booleans are allowed.")
+            }
 
         /**
          * Creates a constant expression from a value.
@@ -116,7 +125,7 @@ interface Expr<T> : Renderable<T> {
          * @param value the constant value
          * @return an expression representing the constant
          */
-        @JvmStatic fun constant(value: Any?): Expr<*> = Constant(value)
+        @JvmStatic fun constant(value: Any?): Expr<*> = ConstantExpr(value)
 
         /**
          * Creates a variable expression that will be bound as a MyBatis query parameter.

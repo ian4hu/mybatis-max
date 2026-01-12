@@ -47,7 +47,7 @@ data class Alias<T>(
      * @return the rendered SQL fragment with optional alias
      */
     override fun render(wrapper: AbstractWrapper<*, *, *>): String {
-        val renderedAlias = Expr.literal(alias).render(wrapper)
+        val renderedAlias = if (alias.isBlank()) { alias } else Expr.literal(alias).render(wrapper)
         val rendered = if (expr is CompositeExpr) "(${expr.render(wrapper)})" else expr.render(wrapper)
         return if (renderedAlias.isBlank()) rendered else "$rendered AS $renderedAlias"
     }

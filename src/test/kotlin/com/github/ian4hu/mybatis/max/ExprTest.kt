@@ -29,7 +29,7 @@ import com.github.ian4hu.mybatis.max.Expr.Companion.not
 import com.github.ian4hu.mybatis.max.Expr.Companion.or
 import com.github.ian4hu.mybatis.max.entity.BlockStorageDBO
 import com.github.ian4hu.mybatis.max.expr.AndExpr
-import com.github.ian4hu.mybatis.max.expr.Constant
+import com.github.ian4hu.mybatis.max.expr.ConstantExpr
 import com.github.ian4hu.mybatis.max.expr.OrExpr
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -73,7 +73,7 @@ class ExprTest : MybatisBootstrap {
                 Expr.kotlinProperty(BlockStorageDBO::id),
                 Expr.column("out_biz_id"),
                 Expr.constant(null),
-                Constant(Double.valueOf("10")),
+                ConstantExpr(Double.valueOf("10")),
             )
         val wmConcat = functionCall.render(Wrappers.query<Any>())
         val exprStr =

@@ -44,17 +44,52 @@ data class LiteralExpr(
 
     companion object {
         /**
-         * Regular expression pattern for validating safe SQL literals.
+         * Regular expression pattern for validating safe SQL identifier literals.
          *
          * Matches valid SQL identifiers: alphanumeric strings (case-insensitive) that start with
          * a letter (A-Z) or underscore (_), followed by any combination of letters, digits (0-9),
          * or underscores.
          *
-         * Examples of valid literals: `user_name`, `COUNT`, `table1`, `_temp`
+         * Examples of valid identifiers: `user_name`, `COUNT`, `table1`, `_temp`, `NULL`
          *
-         * Examples of invalid literals: `user-name` (contains hyphen), `1user` (starts with digit),
+         * Examples of invalid identifiers: `user-name` (contains hyphen), `1user` (starts with digit),
          * `user name` (contains space), `user;DROP` (contains semicolon)
          */
-        val LITERAL_REGEX = Regex("(?i)^[_A-Z][_A-Z0-9]*$")
+        val IDENTIFIER_REGEX = Regex("(?i)^[_A-Z][_A-Z0-9]*$")
+
+        /**
+         * Regular expression pattern for validating safe SQL numeric literals.
+         *
+         * Matches valid numeric formats:
+         * - Integers: `123`, `-456`
+         * - Decimals: `3.14`, `-0.5`, `.5`
+         * - Scientific notation: `1.23e10`, `1E-5`
+         *
+         * Examples of valid numbers: `42`, `-123`, `3.14`, `-0.5`, `1.23E10`
+         */
+        val NUMERIC_REGEX = Regex("^[+-]?\\d*\\.?\\d+([eE][+-]?\\d+)?$")
+
+        /**
+         * Regular expression pattern for validating safe SQL boolean literals.
+         *
+         * Matches: `true`, `false`, `TRUE`, `FALSE` (case-insensitive)
+         */
+        val BOOLEAN_REGEX = Regex("(?i)^(true|false)$")
+
+        /**
+         * Checks if the given value is a safe SQL literal that can be rendered directly.
+         *
+         * Safe literals include:
+         * - SQL identifiers (column names, keywords)
+         * - Numeric values (integers, decimals, scientific notation)
+         * - Boolean values (true, false)
+         *
+         * @param value the value to validate
+         * @return true if the value is safe to render as a literal
+         */
+        fun isSafeLiteral(value: String): Boolean =
+            value.matches(IDENTIFIER_REGEX) ||
+                value.matches(NUMERIC_REGEX) ||
+                value.matches(BOOLEAN_REGEX)
     }
 }
