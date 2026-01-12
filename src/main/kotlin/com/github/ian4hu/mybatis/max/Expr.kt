@@ -69,19 +69,18 @@ interface Expr<T> : Renderable<T> {
         fun functionCall(
             fn: String,
             vararg args: Any?,
-        ): Expr<*> =
-            FunctionCallExpr(
-                fn,
-                *args
-                    .mapIndexed { index, it ->
-                        if (it is Alias<*>) {
-                            throw IllegalArgumentException(
-                                "Function parameter #$index: Alias can not as function parameter.",
-                            )
-                        }
-                        it as? Expr<*> ?: variable(it)
-                    }.toTypedArray(),
-            )
+        ): Expr<*> = FunctionCallExpr(
+            fn,
+            *args
+                .mapIndexed { index, it ->
+                    if (it is Alias<*>) {
+                        throw IllegalArgumentException(
+                            "Function parameter #$index: Alias can not as function parameter.",
+                        )
+                    }
+                    it as? Expr<*> ?: variable(it)
+                }.toTypedArray(),
+        )
 
         @JvmStatic fun and(
             a: Expr<*>,

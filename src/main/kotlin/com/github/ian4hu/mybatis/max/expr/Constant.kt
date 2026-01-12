@@ -36,15 +36,14 @@ data class Constant(
 
     private fun isPrimitive(value: Any): Boolean = value.javaClass.isPrimitive && value.javaClass != Void.TYPE
 
-    private fun isBoxedPrimitive(value: Any): Boolean =
-        when (value) {
-            is Boolean -> true
-            is Byte -> true
-            is Short -> true
-            is Int -> true
-            is Long -> true
-            is Float -> true
-            is Double -> true
-            else -> false
-        }
+    private fun isBoxedPrimitive(value: Any): Boolean = when (value) {
+        is Boolean -> true
+        is Byte -> true
+        is Short -> true
+        is Int -> true
+        is Long -> true
+        is Float -> true
+        is Double -> true
+        else -> false
+    }
 }

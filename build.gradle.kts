@@ -49,9 +49,11 @@ spotless {
     }
 
     kotlin {
-        ktlint()
+        ktlint().editorConfigOverride(mapOf(
+            "ij_kotlin_packages_to_use_import_on_demand" to arrayOf("java.util.*","org.junit.jupiter.api.Assertions.*","kotlin.test.*").joinToString(",")
+        ))
         trimTrailingWhitespace()
-        indentWithSpaces()
+        leadingTabsToSpaces()
         endWithNewline()
         licenseHeaderFile(rootProject.file("LICENSE_HEADER"))
     }
