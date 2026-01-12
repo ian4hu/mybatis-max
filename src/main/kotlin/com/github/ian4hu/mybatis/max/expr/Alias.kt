@@ -17,6 +17,7 @@ package com.github.ian4hu.mybatis.max.expr
 
 import com.baomidou.mybatisplus.core.conditions.AbstractWrapper
 import com.github.ian4hu.mybatis.max.Renderable
+import com.github.ian4hu.mybatis.max.Expr
 
 /**
  * Represents a SQL alias wrapper that renders an expression with an optional alias name.
@@ -46,7 +47,8 @@ data class Alias<T>(
      * @return the rendered SQL fragment with optional alias
      */
     override fun render(wrapper: AbstractWrapper<*, *, *>): String {
+        val renderedAlias = Expr.literal(alias).render(wrapper)
         val rendered = if (expr is CompositeExpr) "(${expr.render(wrapper)})" else expr.render(wrapper)
-        return if (alias.isBlank()) rendered else "$rendered AS $alias"
+        return if (renderedAlias.isBlank()) rendered else "$rendered AS $renderedAlias"
     }
 }

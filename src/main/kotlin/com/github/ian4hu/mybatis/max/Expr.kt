@@ -94,12 +94,19 @@ interface Expr<T> : Renderable<T> {
         /**
          * Creates a literal expression that renders directly into SQL without escaping or quoting.
          *
-         * **Warning**: Use with caution to avoid SQL injection vulnerabilities.
+         * Literals are validated against [LiteralExpr.LITERAL_REGEX] to ensure they contain only
+         * safe SQL identifiers (alphanumeric characters and underscores, starting with a letter or underscore).
+         * This validation prevents SQL injection attacks by rejecting potentially dangerous characters.
          *
-         * @param value the raw SQL literal string
+         * **Valid examples**: `user_name`, `COUNT`, `table1`, `_temp`
+         *
+         * **Invalid examples**: `user-name`, `1user`, `user name`, `user;DROP`
+         *
+         * @param value the raw SQL literal string (must match the identifier pattern)
          * @return an expression that renders as-is in SQL
+         * @throws IllegalArgumentException if the value contains invalid characters or doesn't match the safe identifier pattern
          */
-        @JvmStatic fun literal(value: String): Expr<String> = LiteralExpr(value)
+        @JvmStatic fun literal(value: String): Expr<String> = if (value.matches(LiteralExpr.LITERAL_REGEX)) LiteralExpr(value) else throw IllegalArgumentException("'$value>' is not a valid literal")
 
         /**
          * Creates a constant expression from a value.
