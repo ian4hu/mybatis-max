@@ -33,10 +33,15 @@ import com.github.ian4hu.mybatis.max.Renderable
  * @property alias the SQL alias name (can be blank to render without alias)
  * @property expr the underlying renderable expression to be aliased
  */
-data class Alias<T>(
+data class Alias(
     val alias: String,
-    val expr: Renderable<T>,
-) : Renderable<T> {
+    val expr: Renderable,
+) : Renderable {
+
+    init {
+        if (alias.isNotBlank() && !isValidIdentifier(alias)) throw IllegalArgumentException("'$alias' is not valid alias")
+    }
+
     /**
      * Renders the aliased expression into a SQL fragment.
      *
@@ -47,8 +52,11 @@ data class Alias<T>(
      * @return the rendered SQL fragment with optional alias
      */
     override fun render(wrapper: AbstractWrapper<*, *, *>): String {
-        val renderedAlias = if (alias.isBlank()) { alias } else Expr.literal(alias).render(wrapper)
         val rendered = if (expr is CompositeExpr) "(${expr.render(wrapper)})" else expr.render(wrapper)
-        return if (renderedAlias.isBlank()) rendered else "$rendered AS $renderedAlias"
+        return if (alias.isBlank()) rendered else "$rendered AS $alias"
+    }
+
+    companion object {
+        fun isValidIdentifier(value: String): Boolean = value.matches(LiteralExpr.IDENTIFIER_REGEX)
     }
 }

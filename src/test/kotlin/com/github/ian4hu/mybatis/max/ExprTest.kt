@@ -139,14 +139,14 @@ class ExprTest : MybatisBootstrap {
                     "A AND B AND C",
                 ),
                 of(
-                    AndExpr<Any>(
+                    AndExpr(
                         listOf(and(literal("A"), literal("B")), and(literal("B"), literal("C"))),
                     ),
                     "A AND B AND B AND C",
                 ),
                 of(or(or(literal("A"), literal("B")), or(literal("B"), literal("C"))), "A OR B OR C"),
                 of(
-                    OrExpr<Any>(
+                    OrExpr(
                         listOf(or(literal("A"), literal("B")), or(literal("B"), literal("C"))),
                     ),
                     "A OR B OR B OR C",
@@ -253,7 +253,7 @@ class ExprTest : MybatisBootstrap {
     fun testLogicOperator(
         name: String,
         wrapper: AbstractWrapper<*, *, *>,
-        expr: Renderable<*>,
+        expr: Renderable,
         expected: String,
     ) {
         val result = expr.render(wrapper)

@@ -21,6 +21,9 @@ import com.github.ian4hu.mybatis.max.Expr
 
 data class ColumnExpr(
     val value: String,
-) : Expr<String> {
+) : Expr {
+    init {
+        if (!Alias.isValidIdentifier(value)) throw IllegalArgumentException("'$value' is not valid column name")
+    }
     override fun render(wrapper: AbstractWrapper<*, *, *>): String = Helper.wrapColumn(wrapper, value)
 }

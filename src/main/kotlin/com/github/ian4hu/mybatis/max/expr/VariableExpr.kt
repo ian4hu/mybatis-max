@@ -36,7 +36,7 @@ import com.github.ian4hu.mybatis.max.Expr
 data class VariableExpr(
     val value: Any?,
     val mapping: String? = null,
-) : Expr<Any?> {
+) : Expr {
     /**
      * Renders this variable as a MyBatis parameter placeholder.
      *

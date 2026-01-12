@@ -23,6 +23,6 @@ import kotlin.reflect.KProperty1
 data class KotlinPropertyExpr<T>(
     val value: KProperty1<T, *>,
     val entityClass: Class<T>,
-) : Expr<KProperty1<T, *>> {
+) : Expr {
     override fun render(wrapper: AbstractWrapper<*, *, *>): String = Helper.wrapProperty(wrapper, value, entityClass)
 }

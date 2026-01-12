@@ -36,9 +36,9 @@ import com.github.ian4hu.mybatis.max.Expr
  * @param O the property type (output/return type of the getter method)
  * @property value the MyBatis-Plus serializable function reference
  */
-data class LambdaExpr<out I, out O>(
-    val value: SFunction<*, *>,
-) : Expr<SFunction<*, *>> {
+data class LambdaExpr<T : Any>(
+    val value: SFunction<T, *>,
+) : Expr {
     /**
      * Renders this lambda reference as a SQL column name.
      *

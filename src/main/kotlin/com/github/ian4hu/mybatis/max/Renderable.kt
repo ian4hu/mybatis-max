@@ -27,7 +27,7 @@ import com.github.ian4hu.mybatis.max.expr.Alias
  *
  * @param T the type of the renderable value
  */
-interface Renderable<T> {
+interface Renderable {
     /**
      * Renders this object into a SQL fragment string.
      *
@@ -45,5 +45,5 @@ interface Renderable<T> {
      * @param alias the SQL alias name (e.g., "user_name" or "total_count")
      * @return an [Alias] wrapping this renderable with the specified alias name
      */
-    fun alias(alias: String): Alias<T> = if (this is Alias) Alias(alias, this.expr) else Alias(alias, this)
+    fun alias(alias: String): Alias = if (this is Alias) Alias(alias, this.expr) else Alias(alias, this)
 }

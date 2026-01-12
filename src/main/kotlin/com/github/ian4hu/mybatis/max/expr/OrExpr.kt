@@ -18,11 +18,11 @@ package com.github.ian4hu.mybatis.max.expr
 import com.baomidou.mybatisplus.core.conditions.AbstractWrapper
 import com.github.ian4hu.mybatis.max.Expr
 
-data class OrExpr<T>(
-    val elements: List<Expr<*>>,
-) : CompositeExpr<T> {
+data class OrExpr(
+    val elements: List<Expr>,
+) : CompositeExpr {
     override fun render(wrapper: AbstractWrapper<*, *, *>): String = elements.distinct().joinToString(" OR ") {
-        if (it is CompositeExpr<*> && it !is OrExpr<*>) {
+        if (it is CompositeExpr && it !is OrExpr) {
             "(${it.render(wrapper)})"
         } else {
             it.render(wrapper)

@@ -33,7 +33,12 @@ import com.github.ian4hu.mybatis.max.Expr
  */
 data class LiteralExpr(
     val value: String,
-) : Expr<String> {
+) : Expr {
+
+    init {
+        if (!isSafeLiteral(value)) throw IllegalArgumentException("'$value' is not a valid literal. Only SQL identifiers, numbers, and booleans are allowed.")
+    }
+
     /**
      * Renders the literal value directly into SQL without any modification.
      *
@@ -87,9 +92,8 @@ data class LiteralExpr(
          * @param value the value to validate
          * @return true if the value is safe to render as a literal
          */
-        fun isSafeLiteral(value: String): Boolean =
-            value.matches(IDENTIFIER_REGEX) ||
-                value.matches(NUMERIC_REGEX) ||
-                value.matches(BOOLEAN_REGEX)
+        fun isSafeLiteral(value: String): Boolean = value.matches(IDENTIFIER_REGEX) ||
+            value.matches(NUMERIC_REGEX) ||
+            value.matches(BOOLEAN_REGEX)
     }
 }

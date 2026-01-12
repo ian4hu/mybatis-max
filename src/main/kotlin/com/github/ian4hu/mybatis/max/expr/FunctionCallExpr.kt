@@ -21,9 +21,9 @@ import com.github.ian4hu.mybatis.max.Expr
 
 data class FunctionCallExpr(
     val fn: String,
-    val args: List<Expr<*>> = emptyList(),
-) : Expr<Any> {
-    constructor(fn: String, vararg args: Expr<*>) : this(fn, listOf(*args))
+    val args: List<Expr> = emptyList(),
+) : Expr {
+    constructor(fn: String, vararg args: Expr) : this(fn, listOf(*args))
 
     override fun render(wrapper: AbstractWrapper<*, *, *>): String {
         val symbol = Expr.literal(fn).render(wrapper)

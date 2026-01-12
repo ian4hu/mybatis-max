@@ -35,7 +35,7 @@ import com.github.ian4hu.mybatis.max.Expr
  */
 data class ConstantExpr(
     val value: Any?,
-) : Expr<Any> {
+) : Expr {
     /**
      * Renders the constant value into appropriate SQL representation.
      *

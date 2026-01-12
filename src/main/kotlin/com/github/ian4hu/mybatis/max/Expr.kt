@@ -44,7 +44,7 @@ import kotlin.reflect.KProperty1
  *
  * @param T the type of the expression's value
  */
-interface Expr<T> : Renderable<T> {
+interface Expr : Renderable {
     companion object {
         /**
          * Creates a column reference expression from a string-based column name.
@@ -52,7 +52,7 @@ interface Expr<T> : Renderable<T> {
          * @param value the database column name
          * @return an expression representing the column
          */
-        @JvmStatic fun column(value: String): Expr<String> = ColumnExpr(value)
+        @JvmStatic fun column(value: String): Expr = ColumnExpr(value)
 
         /**
          * Creates a column reference expression from a MyBatis-Plus lambda method reference.
@@ -64,7 +64,7 @@ interface Expr<T> : Renderable<T> {
          * @param value the lambda method reference
          * @return an expression representing the column derived from the lambda
          */
-        @JvmStatic fun <I, O> lambda(value: SFunction<I, O>): Expr<SFunction<*, *>> = LambdaExpr<I, O>(value)
+        @JvmStatic fun <I: Any, O> lambda(value: SFunction<I, O>): Expr = LambdaExpr(value)
 
         /**
          * Creates a column reference expression from a Kotlin property reference with reified type.
@@ -75,7 +75,7 @@ interface Expr<T> : Renderable<T> {
          * @param value the Kotlin property reference
          * @return an expression representing the column derived from the property
          */
-        inline fun <reified T> kotlinProperty(value: KProperty1<T, *>): Expr<KProperty1<T, *>> = kotlinProperty(value, T::class.java)
+        inline fun <reified T> kotlinProperty(value: KProperty1<T, *>): Expr = kotlinProperty(value, T::class.java)
 
         /**
          * Creates a column reference expression from a Kotlin property reference with explicit entity class.
@@ -88,7 +88,7 @@ interface Expr<T> : Renderable<T> {
         fun <T> kotlinProperty(
             value: KProperty1<T, *>,
             entityClass: Class<T>,
-        ): Expr<KProperty1<T, *>> = KotlinPropertyExpr(value, entityClass)
+        ): Expr = KotlinPropertyExpr(value, entityClass)
 
         /**
          * Creates a literal expression that renders directly into SQL without escaping or quoting.
@@ -109,12 +109,7 @@ interface Expr<T> : Renderable<T> {
          * @return an expression that renders as-is in SQL
          * @throws IllegalArgumentException if the value doesn't match any safe literal pattern
          */
-        @JvmStatic fun literal(value: String): Expr<String> =
-            if (LiteralExpr.isSafeLiteral(value)) {
-                LiteralExpr(value)
-            } else {
-                throw IllegalArgumentException("'$value' is not a valid literal. Only SQL identifiers, numbers, and booleans are allowed.")
-            }
+        @JvmStatic fun literal(value: String): Expr = LiteralExpr(value)
 
         /**
          * Creates a constant expression from a value.
@@ -125,7 +120,7 @@ interface Expr<T> : Renderable<T> {
          * @param value the constant value
          * @return an expression representing the constant
          */
-        @JvmStatic fun constant(value: Any?): Expr<*> = ConstantExpr(value)
+        @JvmStatic fun constant(value: Any?): Expr = ConstantExpr(value)
 
         /**
          * Creates a variable expression that will be bound as a MyBatis query parameter.
@@ -140,7 +135,7 @@ interface Expr<T> : Renderable<T> {
         fun variable(
             value: Any?,
             mapping: String? = null,
-        ): Expr<*> = VariableExpr(value, mapping)
+        ): Expr = VariableExpr(value, mapping)
 
         /**
          * Creates a function call expression that renders as a native SQL function.
@@ -156,16 +151,16 @@ interface Expr<T> : Renderable<T> {
         fun functionCall(
             fn: String,
             vararg args: Any?,
-        ): Expr<*> = FunctionCallExpr(
+        ): Expr = FunctionCallExpr(
             fn,
             *args
                 .mapIndexed { index, it ->
-                    if (it is Alias<*>) {
+                    if (it is Alias) {
                         throw IllegalArgumentException(
                             "Function parameter #$index: Alias can not as function parameter.",
                         )
                     }
-                    it as? Expr<*> ?: variable(it)
+                    it as? Expr?: variable(it)
                 }.toTypedArray(),
         )
 
@@ -178,10 +173,10 @@ interface Expr<T> : Renderable<T> {
          * @return a composite AND expression
          */
         @JvmStatic fun and(
-            a: Expr<*>,
-            b: Expr<*>,
-            vararg others: Expr<*>,
-        ): Expr<*> = a.and(b, *others)
+            a: Expr,
+            b: Expr,
+            vararg others: Expr,
+        ): Expr = a.and(b, *others)
 
         /**
          * Combines multiple expressions using the OR logical operator.
@@ -192,10 +187,10 @@ interface Expr<T> : Renderable<T> {
          * @return a composite OR expression
          */
         @JvmStatic fun or(
-            a: Expr<*>,
-            b: Expr<*>,
-            vararg others: Expr<*>,
-        ): Expr<*> = a.or(b, *others)
+            a: Expr,
+            b: Expr,
+            vararg others: Expr,
+        ): Expr = a.or(b, *others)
 
         /**
          * Negates an expression using the NOT logical operator.
@@ -203,7 +198,7 @@ interface Expr<T> : Renderable<T> {
          * @param a the expression to negate
          * @return a NOT expression
          */
-        @JvmStatic fun not(a: Expr<*>): Expr<*> = a.not()
+        @JvmStatic fun not(a: Expr): Expr = a.not()
     }
 
     /**
@@ -215,13 +210,13 @@ interface Expr<T> : Renderable<T> {
      * @param expr additional expressions to combine with this one
      * @return a composite AND expression, or a single expression if only one remains
      */
-    fun and(vararg expr: Expr<*>): Expr<*> {
+    fun and(vararg expr: Expr): Expr {
         val elements =
             listOf(this, *expr).flatMap { if (it is AndExpr) it.elements else listOf(it) }.distinct()
         if (elements.size == 1) {
             return elements[0]
         }
-        return AndExpr<Any>(elements)
+        return AndExpr.of(*elements.toTypedArray())
     }
 
     /**
@@ -233,13 +228,13 @@ interface Expr<T> : Renderable<T> {
      * @param expr additional expressions to combine with this one
      * @return a composite OR expression, or a single expression if only one remains
      */
-    fun or(vararg expr: Expr<*>): Expr<*> {
+    fun or(vararg expr: Expr): Expr {
         val elements =
             listOf(this, *expr).flatMap { if (it is OrExpr) it.elements else listOf(it) }.distinct()
         if (elements.size == 1) {
             return elements[0]
         }
-        return OrExpr<Any>(elements)
+        return OrExpr(elements)
     }
 
     /**
@@ -249,5 +244,5 @@ interface Expr<T> : Renderable<T> {
      *
      * @return a NOT expression, or the original expression if this is already a NOT expression
      */
-    fun not(): Expr<T> = if (this is NotExpr<T>) this.expr else NotExpr(this)
+    fun not(): Expr = if (this is NotExpr) this.expr else NotExpr(this)
 }
