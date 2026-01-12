@@ -28,6 +28,9 @@ import com.github.ian4hu.mybatis.max.Expr.Companion.literal
 import com.github.ian4hu.mybatis.max.Expr.Companion.not
 import com.github.ian4hu.mybatis.max.Expr.Companion.or
 import com.github.ian4hu.mybatis.max.entity.BlockStorageDBO
+import com.github.ian4hu.mybatis.max.expr.AndExpr
+import com.github.ian4hu.mybatis.max.expr.Constant
+import com.github.ian4hu.mybatis.max.expr.OrExpr
 import java.lang.Double
 import java.util.stream.Stream
 import kotlin.Any
