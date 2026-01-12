@@ -19,11 +19,31 @@ import com.baomidou.mybatisplus.core.conditions.AbstractWrapper
 import com.github.ian4hu.mybatis.max.expr.Alias
 
 /**
- * A renderable object, which can be rendered with a MybatisPlus
- * [com.baomidou.mybatisplus.core.conditions.Wrapper]
+ * Represents an object that can be rendered into SQL fragments using a MyBatis-Plus wrapper.
+ *
+ * Implementations of this interface provide the ability to generate SQL string representations
+ * within the context of a [com.baomidou.mybatisplus.core.conditions.Wrapper], enabling
+ * integration with MyBatis-Plus dynamic SQL generation.
+ *
+ * @param T the type of the renderable value
  */
 interface Renderable<T> {
+    /**
+     * Renders this object into a SQL fragment string.
+     *
+     * @param wrapper the MyBatis-Plus wrapper context used for SQL generation
+     * @return the rendered SQL fragment
+     */
     fun render(wrapper: AbstractWrapper<*, *, *>): String
 
+    /**
+     * Creates an aliased version of this renderable object for use in SQL queries.
+     *
+     * If this renderable is already an [Alias], replaces the alias name while preserving
+     * the underlying expression. Otherwise, wraps this renderable in a new alias.
+     *
+     * @param alias the SQL alias name (e.g., "user_name" or "total_count")
+     * @return an [Alias] wrapping this renderable with the specified alias name
+     */
     fun alias(alias: String): Alias<T> = if (this is Alias) Alias(alias, this.expr) else Alias(alias, this)
 }
