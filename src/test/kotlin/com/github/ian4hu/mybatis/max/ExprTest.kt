@@ -31,6 +31,7 @@ import com.github.ian4hu.mybatis.max.entity.BlockStorageDBO
 import com.github.ian4hu.mybatis.max.expr.AndExpr
 import com.github.ian4hu.mybatis.max.expr.ConstantExpr
 import com.github.ian4hu.mybatis.max.expr.OrExpr
+import com.github.ian4hu.mybatis.max.render.WrapperRender
 import org.apache.ibatis.type.BigIntegerTypeHandler
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test

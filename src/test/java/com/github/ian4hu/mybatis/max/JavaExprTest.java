@@ -27,6 +27,7 @@ import com.baomidou.mybatisplus.core.conditions.AbstractWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.github.ian4hu.mybatis.max.entity.BlockStorageDBO;
+import com.github.ian4hu.mybatis.max.render.WrapperRender;
 
 import org.junit.jupiter.api.Test;
 

@@ -13,17 +13,21 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package com.github.ian4hu.mybatis.max
+package com.github.ian4hu.mybatis.max.render
 
 import com.baomidou.mybatisplus.core.conditions.AbstractWrapper
 import com.baomidou.mybatisplus.core.conditions.Helper
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction
-import kotlin.reflect.KProperty
+import com.github.ian4hu.mybatis.max.Render
 import kotlin.reflect.KProperty1
 
 /**
- * @author ian
- * @date 2026/01/12
+ * MyBatis-Plus wrapper-based implementation of [Render].
+ *
+ * Delegates rendering operations to MyBatis-Plus's [Helper] utility methods,
+ * providing integration with MyBatis-Plus's dynamic SQL generation.
+ *
+ * @property wrapper the MyBatis-Plus wrapper context for SQL generation
  */
 class WrapperRender(val wrapper: AbstractWrapper<*, *, *>) : Render {
     override fun column(column: String): String = Helper.wrapColumn(wrapper, column)

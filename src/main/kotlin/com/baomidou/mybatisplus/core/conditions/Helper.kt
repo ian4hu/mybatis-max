@@ -28,10 +28,11 @@ import java.lang.invoke.VarHandle
 import kotlin.reflect.KProperty1
 
 /**
- * Helper to invoke Wrapper's internal method
+ * Utility for invoking MyBatis-Plus wrapper internal methods via reflection.
  *
- * @author ian
- * @date 2026/01/07
+ * Provides bridge methods to access protected/internal MyBatis-Plus APIs,
+ * enabling custom SQL expression rendering with proper column name resolution
+ * and parameter handling.
  */
 object Helper {
     /** To access the method [AbstractWrapper.columnToString] */
@@ -48,10 +49,15 @@ object Helper {
     private val SQL_SELECT_HANDLES = mutableMapOf<Class<*>, VarHandle>()
 
     /**
-     * Invoke [AbstractWrapper.formatParam] to generate placeholder for a param, and add it to
-     * paramMap
+     * Wraps a parameter value as a MyBatis placeholder and registers it in the wrapper.
      *
-     * @return SQL placeholder for param
+     * Delegates to [AbstractWrapper.formatParam] to generate parameter placeholders
+     * (e.g., `#{ew.paramNameValuePairs.MPGENVAL1}`).
+     *
+     * @param wrapper the wrapper context for parameter registration
+     * @param param the parameter value
+     * @param mapping optional MyBatis type handler mapping (e.g., "jdbcType=VARCHAR")
+     * @return SQL placeholder for the parameter
      */
     @JvmStatic
     fun wrapParam(
@@ -60,6 +66,16 @@ object Helper {
         mapping: String? = null,
     ): String = wrapper.formatParam(mapping, param)
 
+    /**
+     * Resolves a string column name to its SQL representation.
+     *
+     * If the wrapper's column type matches string, uses the wrapper's entity mapping.
+     * Otherwise, creates a temporary query wrapper for column resolution.
+     *
+     * @param wrapper the wrapper context
+     * @param column the column name
+     * @return the SQL column representation
+     */
     @JvmStatic
     fun <T : Any> wrapColumn(
         wrapper: AbstractWrapper<*, T, *>,
@@ -69,6 +85,16 @@ object Helper {
         return invokeColumnToString(target, column)
     }
 
+    /**
+     * Resolves a lambda method reference to its SQL column representation.
+     *
+     * If the wrapper's column type matches lambda, uses the wrapper's entity mapping.
+     * Otherwise, creates a temporary lambda query wrapper for column resolution.
+     *
+     * @param wrapper the wrapper context
+     * @param column the lambda method reference (e.g., `User::getName`)
+     * @return the SQL column representation
+     */
     @JvmStatic
     fun <T : Any> wrapLambda(
         wrapper: AbstractWrapper<*, *, *>,
@@ -78,6 +104,17 @@ object Helper {
         return invokeColumnToString(target, column)
     }
 
+    /**
+     * Resolves a Kotlin property reference to its SQL column representation.
+     *
+     * If the wrapper's column type matches Kotlin property, uses the wrapper's entity mapping.
+     * Otherwise, creates a temporary Kotlin query wrapper for column resolution.
+     *
+     * @param wrapper the wrapper context
+     * @param column the Kotlin property reference (e.g., `User::name`)
+     * @param entityClass the entity class for column name resolution
+     * @return the SQL column representation
+     */
     fun wrapProperty(
         wrapper: AbstractWrapper<*, *, *>,
         column: KProperty1<*, Any?>,
@@ -88,11 +125,30 @@ object Helper {
         return invokeColumnToString(target, column)
     }
 
+    /**
+     * Resolves a Kotlin property reference to its SQL column representation.
+     *
+     * Uses the wrapper's entity class for column name resolution.
+     *
+     * @param wrapper the wrapper context with entity class information
+     * @param column the Kotlin property reference
+     * @return the SQL column representation
+     */
     fun <T : Any> wrapProperty(
         wrapper: AbstractWrapper<T, *, *>,
         column: KProperty1<T, Any?>,
     ): String = wrapProperty(wrapper, column, entityClass = wrapper.entityClass as Class<T>)
 
+    /**
+     * Checks if the column type matches the wrapper's expected column type.
+     *
+     * Resolves generic type arguments to determine if the provided column
+     * is compatible with the wrapper's column type parameter.
+     *
+     * @param wrapper the wrapper to check
+     * @param column the column value to match
+     * @return true if column type matches wrapper's column type parameter
+     */
     fun matchColumnType(
         wrapper: AbstractWrapper<*, *, *>,
         column: Any,
@@ -103,11 +159,26 @@ object Helper {
         return columnType.isInstance(column)
     }
 
+    /**
+     * Invokes the protected [AbstractWrapper.columnToString] method via reflection.
+     *
+     * @param target the wrapper instance
+     * @param column the column value to convert
+     * @return the SQL column string representation
+     */
     fun invokeColumnToString(
         target: AbstractWrapper<*, *, *>,
         column: Any,
     ): String = COLUMN_TO_STRING.bindTo(target).invoke(column) as String
 
+    /**
+     * Retrieves the internal sqlSelect field from a query wrapper via reflection.
+     *
+     * Uses VarHandle for efficient field access, with caching for repeated access.
+     *
+     * @param wrapper the query wrapper
+     * @return the shared string containing the SELECT clause
+     */
     fun getSqlSelect(wrapper: Query<*, *, *>): SharedString {
         // Unwrap proxy
         val target = AopUtils.getTargetObject(wrapper)
