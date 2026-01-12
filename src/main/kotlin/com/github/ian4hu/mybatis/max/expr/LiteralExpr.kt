@@ -19,17 +19,14 @@ import com.baomidou.mybatisplus.core.conditions.AbstractWrapper
 import com.github.ian4hu.mybatis.max.Expr
 
 /**
- * Represents a literal SQL expression that renders directly into SQL without escaping or parameterization.
+ * Literal SQL expression that renders directly without escaping.
  *
- * Literals are used for SQL identifiers (column names, table names) or keywords that must appear
- * as-is in the generated SQL. To prevent SQL injection vulnerabilities, only values matching
- * the pattern defined by [LITERAL_REGEX] are accepted (alphanumeric identifiers starting with
- * a letter or underscore).
+ * Literals are used for SQL identifiers (column names, table names) or keywords.
+ * Only values matching safe patterns are accepted to prevent SQL injection.
  *
- * **Security Note**: Literals bypass SQL parameterization. Use [Expr.literal] factory method
- * which validates the input against [LITERAL_REGEX] before creating instances.
+ * Use [Expr.literal] factory method which validates input before creating instances.
  *
- * @property value the raw SQL literal string (must match [LITERAL_REGEX] pattern)
+ * @property value the raw SQL literal string (validated on construction)
  */
 data class LiteralExpr(
     val value: String,
@@ -40,57 +37,42 @@ data class LiteralExpr(
     }
 
     /**
-     * Renders the literal value directly into SQL without any modification.
-     *
-     * @param wrapper the MyBatis-Plus wrapper context (not used for literals)
-     * @return the literal value as-is
+     * Renders the literal value directly into SQL.
      */
     override fun render(wrapper: AbstractWrapper<*, *, *>): String = value
 
     companion object {
         /**
-         * Regular expression pattern for validating safe SQL identifier literals.
+         * Pattern for validating safe SQL identifier literals.
          *
-         * Matches valid SQL identifiers: alphanumeric strings (case-insensitive) that start with
-         * a letter (A-Z) or underscore (_), followed by any combination of letters, digits (0-9),
-         * or underscores.
+         * Matches: alphanumeric strings starting with a letter or underscore.
          *
-         * Examples of valid identifiers: `user_name`, `COUNT`, `table1`, `_temp`, `NULL`
+         * Valid: `user_name`, `COUNT`, `table1`, `_temp`, `NULL`
          *
-         * Examples of invalid identifiers: `user-name` (contains hyphen), `1user` (starts with digit),
-         * `user name` (contains space), `user;DROP` (contains semicolon)
+         * Invalid: `user-name`, `1user`, `user name`, `user;DROP`
          */
         val IDENTIFIER_REGEX = Regex("(?i)^[_A-Z][_A-Z0-9]*$")
 
         /**
-         * Regular expression pattern for validating safe SQL numeric literals.
+         * Pattern for validating safe SQL numeric literals.
          *
-         * Matches valid numeric formats:
-         * - Integers: `123`, `-456`
-         * - Decimals: `3.14`, `-0.5`, `.5`
-         * - Scientific notation: `1.23e10`, `1E-5`
+         * Matches: integers, decimals, scientific notation.
          *
-         * Examples of valid numbers: `42`, `-123`, `3.14`, `-0.5`, `1.23E10`
+         * Valid: `42`, `-123`, `3.14`, `-0.5`, `1.23E10`
          */
         val NUMERIC_REGEX = Regex("^[+-]?\\d*\\.?\\d+([eE][+-]?\\d+)?$")
 
         /**
-         * Regular expression pattern for validating safe SQL boolean literals.
+         * Pattern for validating safe SQL boolean literals.
          *
-         * Matches: `true`, `false`, `TRUE`, `FALSE` (case-insensitive)
+         * Matches: `true`, `false` (case-insensitive)
          */
         val BOOLEAN_REGEX = Regex("(?i)^(true|false)$")
 
         /**
-         * Checks if the given value is a safe SQL literal that can be rendered directly.
+         * Checks if the value is a safe SQL literal.
          *
-         * Safe literals include:
-         * - SQL identifiers (column names, keywords)
-         * - Numeric values (integers, decimals, scientific notation)
-         * - Boolean values (true, false)
-         *
-         * @param value the value to validate
-         * @return true if the value is safe to render as a literal
+         * Safe literals: SQL identifiers, numeric values, or boolean values.
          */
         fun isSafeLiteral(value: String): Boolean = value.matches(IDENTIFIER_REGEX) ||
             value.matches(NUMERIC_REGEX) ||

@@ -19,6 +19,13 @@ import com.baomidou.mybatisplus.core.conditions.AbstractWrapper
 import com.baomidou.mybatisplus.core.conditions.Helper
 import com.github.ian4hu.mybatis.max.Expr
 
+/**
+ * Column reference expression using string-based column name.
+ *
+ * The column name is validated and wrapped using MyBatis-Plus's column resolution.
+ *
+ * @property value the column name
+ */
 data class ColumnExpr(
     val value: String,
 ) : Expr {

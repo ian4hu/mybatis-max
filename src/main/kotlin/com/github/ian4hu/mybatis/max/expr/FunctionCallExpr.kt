@@ -19,6 +19,14 @@ import com.baomidou.mybatisplus.core.conditions.AbstractWrapper
 import com.baomidou.mybatisplus.core.toolkit.StringPool
 import com.github.ian4hu.mybatis.max.Expr
 
+/**
+ * SQL function call expression.
+ *
+ * Renders as `function_name(arg1, arg2, ...)` with validated function name.
+ *
+ * @property fn the SQL function name
+ * @property args the function arguments
+ */
 data class FunctionCallExpr(
     val fn: String,
     val args: List<Expr> = emptyList(),

@@ -17,5 +17,10 @@ package com.github.ian4hu.mybatis.max.expr
 
 import com.github.ian4hu.mybatis.max.Expr
 
-/** A composite expression, which need be bracketed in some situation */
+/**
+ * Marker interface for composite expressions that may need parentheses when nested.
+ *
+ * Composite expressions include logical operations (AND, OR, NOT) and other complex
+ * expressions that require grouping in certain contexts to maintain correct precedence.
+ */
 interface CompositeExpr : Expr

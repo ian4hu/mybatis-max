@@ -18,6 +18,14 @@ package com.github.ian4hu.mybatis.max.expr
 import com.baomidou.mybatisplus.core.conditions.AbstractWrapper
 import com.github.ian4hu.mybatis.max.Expr
 
+/**
+ * Logical AND expression that combines multiple expressions.
+ *
+ * Automatically flattens nested AND expressions and removes duplicates.
+ * Non-AND composite expressions are wrapped in parentheses.
+ *
+ * @property elements the list of expressions to combine
+ */
 @ConsistentCopyVisibility
 data class AndExpr private constructor(
     val elements: List<Expr>,
@@ -31,6 +39,10 @@ data class AndExpr private constructor(
     }
 
     companion object {
+        /**
+         * Creates an AND expression, flattening nested ANDs and removing duplicates.
+         * Returns a single expression if only one element remains after optimization.
+         */
         fun of(a: Expr, b: Expr, vararg expr: Expr): Expr {
             val elements = arrayOf(a, b, *expr)
                 .flatMap { if (it is AndExpr) it.elements else listOf(it) }.distinct()

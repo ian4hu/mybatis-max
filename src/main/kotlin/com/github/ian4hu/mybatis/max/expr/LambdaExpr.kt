@@ -21,19 +21,12 @@ import com.baomidou.mybatisplus.core.toolkit.support.SFunction
 import com.github.ian4hu.mybatis.max.Expr
 
 /**
- * Represents a type-safe column reference expression using MyBatis-Plus lambda method references.
+ * Column reference expression using MyBatis-Plus lambda method references.
  *
- * Lambda expressions enable compile-time type-safe column references in Java by using method references
- * to getter methods (e.g., `User::getName`). MyBatis-Plus analyzes these lambda references to extract
- * the corresponding database column names, providing refactoring-safe SQL generation.
+ * Enables type-safe column references in Java using method references (e.g., `User::getName`).
+ * For Kotlin code, consider using [KotlinPropertyExpr] with Kotlin property references.
  *
- * This expression type is particularly useful in Java environments where property references are not
- * available. For Kotlin code, consider using [KotlinPropertyExpr] with Kotlin property references instead.
- *
- * **Example usage**: `Expr.lambda(User::getName)` represents the column mapped to the `getName()` method.
- *
- * @param I the entity type (input)
- * @param O the property type (output/return type of the getter method)
+ * @param T the entity type
  * @property value the MyBatis-Plus serializable function reference
  */
 data class LambdaExpr<T : Any>(
@@ -42,11 +35,10 @@ data class LambdaExpr<T : Any>(
     /**
      * Renders this lambda reference as a SQL column name.
      *
-     * Uses MyBatis-Plus's [Helper.wrapLambda] to analyze the lambda method reference and extract
-     * the corresponding database column name based on entity mapping configuration.
+     * Uses MyBatis-Plus's [Helper.wrapLambda] to extract the column name from the lambda.
      *
-     * @param wrapper the MyBatis-Plus wrapper context used for column name resolution
-     * @return the database column name derived from the lambda reference
+     * @param wrapper the MyBatis-Plus wrapper context
+     * @return the database column name
      */
     override fun render(wrapper: AbstractWrapper<*, *, *>): String = Helper.wrapLambda(wrapper, value)
 }

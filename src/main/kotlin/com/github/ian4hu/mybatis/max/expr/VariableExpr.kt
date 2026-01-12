@@ -20,18 +20,13 @@ import com.baomidou.mybatisplus.core.conditions.Helper
 import com.github.ian4hu.mybatis.max.Expr
 
 /**
- * Represents a parameterized variable expression that will be safely bound to [java.sql.PreparedStatement].
+ * Parameterized variable expression safely bound to PreparedStatement.
  *
- * Variables are the secure way to include dynamic values in SQL queries, as they are properly
- * parameterized through MyBatis-Plus's wrapper mechanism. This prevents SQL injection attacks
- * by ensuring values are never directly concatenated into SQL strings.
+ * Variables are the secure way to include dynamic values in SQL queries,
+ * preventing SQL injection through proper parameterization.
  *
- * The variable value is wrapped using MyBatis-Plus's [Helper.wrapParam] method, which generates
- * placeholder syntax (e.g., `#{param1}`) that MyBatis will replace with the actual value at
- * execution time.
- *
- * @property value the parameter value to be bound (can be null)
- * @property mapping optional MyBatis type handler mapping for custom type conversion (e.g., `"jdbcType=VARCHAR"`, `"typeHandler=MyTypeHandler"`)
+ * @property value the parameter value (can be null)
+ * @property mapping optional MyBatis type handler mapping (e.g., `"jdbcType=VARCHAR"`)
  */
 data class VariableExpr(
     val value: Any?,
@@ -40,10 +35,7 @@ data class VariableExpr(
     /**
      * Renders this variable as a MyBatis parameter placeholder.
      *
-     * The wrapper's parameter list is updated with this variable's value, and a placeholder
-     * reference (e.g., `#{ew.paramNameValuePairs.MPGENVAL1}`) is returned for inclusion in the SQL.
-     *
-     * @param wrapper the MyBatis-Plus wrapper context that manages parameter bindings
+     * @param wrapper the MyBatis-Plus wrapper context
      * @return a MyBatis parameter placeholder string
      */
     override fun render(wrapper: AbstractWrapper<*, *, *>): String = Helper.wrapParam(wrapper, value, mapping)

@@ -21,11 +21,9 @@ import com.github.ian4hu.mybatis.max.expr.Alias
 /**
  * Represents an object that can be rendered into SQL fragments using a MyBatis-Plus wrapper.
  *
- * Implementations of this interface provide the ability to generate SQL string representations
- * within the context of a [com.baomidou.mybatisplus.core.conditions.Wrapper], enabling
- * integration with MyBatis-Plus dynamic SQL generation.
- *
- * @param T the type of the renderable value
+ * Implementations provide SQL string generation within the context of a
+ * [com.baomidou.mybatisplus.core.conditions.Wrapper], enabling integration
+ * with MyBatis-Plus dynamic SQL generation.
  */
 interface Renderable {
     /**

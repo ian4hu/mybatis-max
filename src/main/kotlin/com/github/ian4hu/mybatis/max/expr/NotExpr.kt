@@ -18,6 +18,14 @@ package com.github.ian4hu.mybatis.max.expr
 import com.baomidou.mybatisplus.core.conditions.AbstractWrapper
 import com.github.ian4hu.mybatis.max.Expr
 
+/**
+ * Logical NOT expression that negates another expression.
+ *
+ * Composite expressions are wrapped in parentheses.
+ * Double negation is automatically eliminated.
+ *
+ * @property expr the expression to negate
+ */
 @ConsistentCopyVisibility
 data class NotExpr private constructor(
     val expr: Expr,
@@ -25,6 +33,7 @@ data class NotExpr private constructor(
     override fun render(wrapper: AbstractWrapper<*, *, *>): String = if (expr is CompositeExpr) "NOT (${expr.render(wrapper)})" else "NOT ${expr.render(wrapper)}"
 
     companion object {
+        /** Creates a NOT expression, eliminating double negation if present. */
         fun of(expr: Expr): Expr = if (expr is NotExpr) expr.expr else NotExpr(expr)
     }
 }

@@ -20,6 +20,15 @@ import com.baomidou.mybatisplus.core.conditions.Helper
 import com.github.ian4hu.mybatis.max.Expr
 import kotlin.reflect.KProperty1
 
+/**
+ * Column reference expression using Kotlin property reference.
+ *
+ * Enables type-safe column references in Kotlin using property syntax (e.g., `User::name`).
+ *
+ * @param T the entity type
+ * @property value the Kotlin property reference
+ * @property entityClass the entity class for column name resolution
+ */
 data class KotlinPropertyExpr<T>(
     val value: KProperty1<T, *>,
     val entityClass: Class<T>,
