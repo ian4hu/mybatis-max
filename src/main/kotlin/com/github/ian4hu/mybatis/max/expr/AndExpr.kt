@@ -31,7 +31,7 @@ data class AndExpr private constructor(
     val elements: List<Expr>,
 ) : CompositeExpr {
     override fun render(wrapper: AbstractWrapper<*, *, *>): String = elements.joinToString(" AND ") {
-        if (it is CompositeExpr && it !is AndExpr) {
+        if (it is CompositeExpr) {
             "(${it.render(wrapper)})"
         } else {
             it.render(wrapper)

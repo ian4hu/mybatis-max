@@ -63,19 +63,11 @@ data class LiteralExpr(
         val NUMERIC_REGEX = Regex("^[+-]?\\d*\\.?\\d+([eE][+-]?\\d+)?$")
 
         /**
-         * Pattern for validating safe SQL boolean literals.
-         *
-         * Matches: `true`, `false` (case-insensitive)
-         */
-        val BOOLEAN_REGEX = Regex("(?i)^(true|false)$")
-
-        /**
          * Checks if the value is a safe SQL literal.
          *
          * Safe literals: SQL identifiers, numeric values, or boolean values.
          */
         fun isSafeLiteral(value: String): Boolean = value.matches(IDENTIFIER_REGEX) ||
-            value.matches(NUMERIC_REGEX) ||
-            value.matches(BOOLEAN_REGEX)
+            value.matches(NUMERIC_REGEX)
     }
 }

@@ -53,20 +53,17 @@ data class ConstantExpr(
         }
 
         // Direct render primitive value
-        if (isPrimitive(value) || isBoxedPrimitive(value)) {
+        if (isBoxedPrimitive(value)) {
             return Expr.literal(value.toString()).render(wrapper)
         }
+
+        if (value is String && LiteralExpr.isSafeLiteral(value)) {
+            return Expr.literal(value).render(wrapper)
+        }
+
         // Non primitive value will take as variable
         return Expr.variable(value).render(wrapper)
     }
-
-    /**
-     * Checks if the value is a primitive type.
-     *
-     * @param value the value to check
-     * @return true if the value is a primitive type (excluding void)
-     */
-    private fun isPrimitive(value: Any): Boolean = value.javaClass.isPrimitive && value.javaClass != Void.TYPE
 
     /**
      * Checks if the value is a boxed primitive wrapper type.

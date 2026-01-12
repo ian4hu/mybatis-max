@@ -31,7 +31,7 @@ data class OrExpr private constructor(
     val elements: List<Expr>,
 ) : CompositeExpr {
     override fun render(wrapper: AbstractWrapper<*, *, *>): String = elements.joinToString(" OR ") {
-        if (it is CompositeExpr && it !is OrExpr) {
+        if (it is CompositeExpr) {
             "(${it.render(wrapper)})"
         } else {
             it.render(wrapper)

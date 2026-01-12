@@ -30,13 +30,40 @@ import com.github.ian4hu.mybatis.max.Expr
  */
 data class VariableExpr(
     val value: Any?,
-    val mapping: String? = null,
+    val mapping: Map<String, String> = emptyMap(),
 ) : Expr {
+    constructor(value: Any?, mapping: String?) : this(value, parseMapping(mapping))
     /**
      * Renders this variable as a MyBatis parameter placeholder.
      *
      * @param wrapper the MyBatis-Plus wrapper context
      * @return a MyBatis parameter placeholder string
      */
-    override fun render(wrapper: AbstractWrapper<*, *, *>): String = Helper.wrapParam(wrapper, value, mapping)
+    override fun render(wrapper: AbstractWrapper<*, *, *>): String = Helper.wrapParam(wrapper, value, formatMapping(mapping))
+
+    fun jdbcType(jdbcType: String) = mapping("jdbcType" to jdbcType)
+    fun javaType(javaType: Class<*>) = mapping("javaType" to javaType.name)
+    fun mode(mode: String) = mapping("mode" to mode)
+    fun IN() = mode("IN")
+    fun OUT() = mode("OUT")
+    fun numericScale(scale: Int) = mapping("numericScale" to scale.toString())
+    fun typeHandler(typeHandler: Class<*>) = mapping("typeHandler" to typeHandler.name)
+
+    fun mapping(vararg kv: Pair<String, String>) = VariableExpr(value, mergeMapping(mapping, *kv))
+
+    companion object {
+        private fun parseMapping(mapping: String?): Map<String, String> {
+            return mapping?.splitToSequence(',').orEmpty()
+                .map { it.split('=',limit = 2) }
+                .map { it[0].trim() to it[1].trim() }
+                .toMap()
+        }
+
+        private fun formatMapping(mapping: Map<String, String>): String? {
+            if (mapping.isEmpty()) return null
+            return mapping.entries.joinToString(",") { (key, value) -> "$key=$value" }
+        }
+
+        private fun mergeMapping(mapping: Map<String, String>, vararg kv: Pair<String, String>) = mapping.plus(kv)
+    }
 }

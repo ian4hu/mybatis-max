@@ -17,6 +17,7 @@ package com.github.ian4hu.mybatis.max
 
 import com.baomidou.mybatisplus.core.conditions.AbstractWrapper
 import com.baomidou.mybatisplus.core.toolkit.Wrappers
+import com.baomidou.mybatisplus.extension.handlers.FastjsonTypeHandler
 import com.baomidou.mybatisplus.extension.kotlin.KtQueryWrapper
 import com.github.ian4hu.mybatis.max.Expr.Companion.and
 import com.github.ian4hu.mybatis.max.Expr.Companion.column
@@ -31,6 +32,7 @@ import com.github.ian4hu.mybatis.max.entity.BlockStorageDBO
 import com.github.ian4hu.mybatis.max.expr.AndExpr
 import com.github.ian4hu.mybatis.max.expr.ConstantExpr
 import com.github.ian4hu.mybatis.max.expr.OrExpr
+import org.apache.ibatis.type.BigIntegerTypeHandler
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -44,13 +46,14 @@ import kotlin.Any
 import kotlin.IllegalArgumentException
 import kotlin.String
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.to
 
 class ExprTest : MybatisBootstrap {
     @Test
     fun render() {
         val wrapper = Wrappers.query<Any>()
-        val concat = Expr.functionCall("concat", "A", "B", "C", null).render(wrapper)
+        val concat = functionCall("concat", "A", "B", "C", null).render(wrapper)
         Assertions.assertEquals(
             "concat(#{ew.paramNameValuePairs.MPGENVAL1},#{ew.paramNameValuePairs.MPGENVAL2},#{ew.paramNameValuePairs.MPGENVAL3},#{ew.paramNameValuePairs.MPGENVAL4})",
             concat,
@@ -60,24 +63,24 @@ class ExprTest : MybatisBootstrap {
         Assertions.assertEquals("C", wrapper.paramNameValuePairs["MPGENVAL3"])
         Assertions.assertNull(wrapper.paramNameValuePairs["MPGENVAL4"])
 
-        val currentTimestamp = Expr.functionCall("current_timestamp").render(Wrappers.query<Any>())
+        val currentTimestamp = functionCall("current_timestamp").render(Wrappers.query<Any>())
         Assertions.assertEquals("current_timestamp()", currentTimestamp)
 
         val functionCall =
-            Expr.functionCall(
+            functionCall(
                 "wm_concat",
-                Expr.constant(1),
-                Expr.lambda(JavaHelperTest.metadata()),
-                Expr.constant(true),
-                Expr.constant("A"),
-                Expr.kotlinProperty(BlockStorageDBO::id),
-                Expr.column("out_biz_id"),
-                Expr.constant(null),
+                constant(1),
+                lambda(JavaHelperTest.metadata()),
+                constant(true),
+                constant("A"),
+                kotlinProperty(BlockStorageDBO::id),
+                column("out_biz_id"),
+                constant(null),
                 ConstantExpr(Double.valueOf("10")),
             )
         val wmConcat = functionCall.render(Wrappers.query<Any>())
         val exprStr =
-            "wm_concat(1,metadata,true,#{ew.paramNameValuePairs.MPGENVAL1},id,out_biz_id,NULL,10.0)"
+            "wm_concat(1,metadata,true,A,id,out_biz_id,NULL,10.0)"
         Assertions.assertEquals(exprStr, wmConcat)
         Assertions.assertEquals(exprStr, functionCall.render(Wrappers.query<Any>()))
         val aliasedFunctionCall = functionCall.alias("expr")
@@ -114,10 +117,10 @@ class ExprTest : MybatisBootstrap {
                     listOf(literal("id"), Expr.variable("p0")),
                     "concat(id,#{ew.paramNameValuePairs.MPGENVAL1})",
                 ),
-                of("current_timestamp", listOf(Expr.constant(6)), "current_timestamp(6)"),
+                of("current_timestamp", listOf(constant(6)), "current_timestamp(6)"),
                 of(
                     "wm_concat",
-                    listOf(",", Expr.column("id")),
+                    listOf(",", column("id")),
                     "wm_concat(#{ew.paramNameValuePairs.MPGENVAL1},id)",
                 ),
             ).flatMap { fn ->
@@ -176,6 +179,7 @@ class ExprTest : MybatisBootstrap {
                 of(column("id").alias("aid").alias("bid"), "id AS bid"),
                 of(column("id").alias("aid").alias(""), "id"),
                 of(constant(1.toShort()).alias("aid"), "1 AS aid"),
+                of(and(literal("+1"),literal("-1"), literal("TRUE"), literal("NULL")), "+1 AND -1 AND TRUE AND NULL")
             ).flatMap { expr ->
                 wrappersProvider().map {
                     of(
@@ -187,7 +191,7 @@ class ExprTest : MybatisBootstrap {
             }
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{0}")
     @MethodSource("wrappersProvider")
     fun testKotlinProperty(
         name: String,
@@ -201,12 +205,12 @@ class ExprTest : MybatisBootstrap {
             )
 
         for ((k, v) in properties) {
-            val result = Expr.kotlinProperty(k).render(wrapper)
+            val result = kotlinProperty(k).render(wrapper)
             assertEquals(v, result)
         }
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{0}")
     @MethodSource("wrappersProvider")
     fun testLiteral(
         name: String,
@@ -217,7 +221,19 @@ class ExprTest : MybatisBootstrap {
         assertEquals(literal, result)
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("wrappersProvider")
+    fun testInvalidLiteral(
+        name: String,
+        wrapper: AbstractWrapper<*, *, *>,
+    ) {
+        assertFailsWith(IllegalArgumentException::class) {
+            val literal = "A';DROP"
+            literal(literal).render(wrapper)
+        }
+    }
+
+    @ParameterizedTest(name = "{0}")
     @MethodSource("wrappersProvider")
     fun testVariable(
         name: String,
@@ -226,9 +242,26 @@ class ExprTest : MybatisBootstrap {
         val result = Expr.variable(name).render(wrapper)
         assertEquals("#{ew.paramNameValuePairs.MPGENVAL1}", result)
         assertEquals(name, wrapper.paramNameValuePairs["MPGENVAL1"])
+
+        val varWithJdbcType = Expr.variable(name, "jdbcType=VARCHAR").render(wrapper)
+        assertEquals("#{ew.paramNameValuePairs.MPGENVAL2,jdbcType=VARCHAR}", varWithJdbcType)
+
+        val varWithMapping = Expr.variable(name)
+            .jdbcType("BIGINT")
+            .javaType(Long::class.java)
+            .typeHandler(BigIntegerTypeHandler::class.java)
+            .OUT()
+            .IN()
+            .numericScale(6)
+            .render(wrapper)
+        assertEquals("#{ew.paramNameValuePairs.MPGENVAL3,jdbcType=BIGINT,javaType=long,typeHandler=org.apache.ibatis.type.BigIntegerTypeHandler,mode=IN,numericScale=6}", varWithMapping)
+
+        val varWithStringMapping = Expr.variable(name, "jdbcType=BIGINT,javaType=long,typeHandler=org.apache.ibatis.type.BigIntegerTypeHandler,mode=IN,numericScale=6")
+            .render(wrapper)
+        assertEquals("#{ew.paramNameValuePairs.MPGENVAL4,jdbcType=BIGINT,javaType=long,typeHandler=org.apache.ibatis.type.BigIntegerTypeHandler,mode=IN,numericScale=6}", varWithStringMapping)
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{0} - {4}")
     @MethodSource("functionCallProvider")
     fun testFunctionCall(
         name: String,
@@ -237,7 +270,7 @@ class ExprTest : MybatisBootstrap {
         args: List<Any?>,
         expected: String,
     ) {
-        val result = Expr.functionCall(fn, *args.toTypedArray()).render(wrapper)
+        val result = functionCall(fn, *args.toTypedArray()).render(wrapper)
         assertEquals(expected, result)
     }
 
@@ -245,14 +278,35 @@ class ExprTest : MybatisBootstrap {
     fun testFunctionCallWithAlias() {
         val exception =
             assertThrows<IllegalArgumentException> {
-                Expr.functionCall("fn", Expr.column("name").alias("nick"))
+                functionCall("fn", column("name").alias("nick"))
             }
         assertEquals("Function parameter #0: Alias can not as function parameter.", exception.message)
     }
 
-    @ParameterizedTest
+    @Test
+    fun testFunctionWithUnsafeLiteral() {
+        assertFailsWith<IllegalArgumentException> {
+            functionCall("--fn", column("name"))
+        }
+    }
+
+    @Test
+    fun testColumnWithUnsafeLiteral() {
+        assertFailsWith<IllegalArgumentException> {
+            column("A as B")
+        }
+    }
+
+    @Test
+    fun testAliasWithUnsafeLiteral() {
+        assertFailsWith<IllegalArgumentException> {
+            column("name").alias(";nick")
+        }
+    }
+
+    @ParameterizedTest(name = "{0} - {3}")
     @MethodSource("exprTestSource")
-    fun testLogicOperator(
+    fun testVariousExpression(
         name: String,
         wrapper: AbstractWrapper<*, *, *>,
         expr: Renderable,

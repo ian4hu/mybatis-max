@@ -28,6 +28,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.github.ian4hu.mybatis.max.entity.BlockStorageDBO;
 
+import kotlin.Pair;
 import org.junit.jupiter.api.Test;
 
 public class JavaExprTest implements MybatisBootstrap {
@@ -53,9 +54,24 @@ public class JavaExprTest implements MybatisBootstrap {
 	@Test
 	public void testNonePrimitiveConstant() {
 		QueryWrapper<Object> wrapper = Wrappers.query();
-		String result = Expr.constant("str").render(wrapper);
+		String result = Expr.constant("1x1").render(wrapper);
 		assertEquals("#{ew.paramNameValuePairs.MPGENVAL1}", result);
-		assertEquals("str", wrapper.getParamNameValuePairs().get("MPGENVAL1"));
+		assertEquals("1x1", wrapper.getParamNameValuePairs().get("MPGENVAL1"));
+
+		String NULL = Expr.constant("NULL").render(wrapper);
+		assertEquals("NULL", NULL);
+
+		String num = Expr.constant("1.23E10").render(wrapper);
+		assertEquals("1.23E10", num);
+
+		String notSafeStr = Expr.constant("'hello world'").render(wrapper);
+		assertEquals("#{ew.paramNameValuePairs.MPGENVAL2}", notSafeStr);
+		assertEquals("'hello world'", wrapper.getParamNameValuePairs().get("MPGENVAL2"));
+
+		Pair<String, String> param = new Pair<>("A", "B");
+		String objParam = Expr.constant(param).render(wrapper);
+		assertEquals("#{ew.paramNameValuePairs.MPGENVAL3}", objParam);
+		assertEquals(param, wrapper.getParamNameValuePairs().get("MPGENVAL3"));
 	}
 
 	@Test

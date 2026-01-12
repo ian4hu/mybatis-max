@@ -18,6 +18,7 @@ package com.github.ian4hu.mybatis.max.expr
 import com.baomidou.mybatisplus.core.conditions.AbstractWrapper
 import com.baomidou.mybatisplus.core.toolkit.StringPool
 import com.github.ian4hu.mybatis.max.Expr
+import com.github.ian4hu.mybatis.max.Expr.Companion.variable
 
 /**
  * SQL function call expression.
@@ -31,12 +32,37 @@ data class FunctionCallExpr(
     val fn: String,
     val args: List<Expr> = emptyList(),
 ) : Expr {
-    constructor(fn: String, vararg args: Expr) : this(fn, listOf(*args))
+
+    init {
+        checkFunctionCall(this)
+    }
+
+    constructor(fn: String, vararg args: Expr) : this(fn, listOf(*args)) {
+        checkFunctionCall(this)
+    }
+
+    constructor(fn: String, vararg args: Any?) : this(fn, *args
+        .mapIndexed { index, it ->
+            if (it is Alias) {
+                throw IllegalArgumentException(
+                    "Function parameter #$index: Alias can not as function parameter.",
+                )
+            }
+            it as? Expr ?: variable(it)
+        }.toTypedArray()) {
+        checkFunctionCall(this)
+    }
 
     override fun render(wrapper: AbstractWrapper<*, *, *>): String {
         val symbol = Expr.literal(fn).render(wrapper)
         return args.joinToString(StringPool.COMMA, prefix = "$symbol(", postfix = ")") {
             it.render(wrapper)
+        }
+    }
+
+    companion object {
+        fun checkFunctionCall(fn: FunctionCallExpr) {
+            if (!Alias.isValidIdentifier(fn.fn)) throw IllegalArgumentException("Invalid function name: '$fn'")
         }
     }
 }

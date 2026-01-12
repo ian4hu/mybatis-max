@@ -128,7 +128,7 @@ interface Expr : Renderable {
         fun variable(
             value: Any?,
             mapping: String? = null,
-        ): Expr = VariableExpr(value, mapping)
+        ): VariableExpr = VariableExpr(value, mapping)
 
         /**
          * Creates a function call expression that renders as a native SQL function.
@@ -144,18 +144,7 @@ interface Expr : Renderable {
         fun functionCall(
             fn: String,
             vararg args: Any?,
-        ): Expr = FunctionCallExpr(
-            fn,
-            *args
-                .mapIndexed { index, it ->
-                    if (it is Alias) {
-                        throw IllegalArgumentException(
-                            "Function parameter #$index: Alias can not as function parameter.",
-                        )
-                    }
-                    it as? Expr ?: variable(it)
-                }.toTypedArray(),
-        )
+        ): Expr = FunctionCallExpr(fn, *args)
 
         /**
          * Combines multiple expressions using AND.
