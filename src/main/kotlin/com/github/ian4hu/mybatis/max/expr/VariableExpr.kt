@@ -25,13 +25,16 @@ import com.github.ian4hu.mybatis.max.Expr
  * Variables are the secure way to include dynamic values in SQL queries,
  * preventing SQL injection through proper parameterization.
  *
+ * Supports fluent configuration of MyBatis type mappings (jdbcType, javaType, mode, etc.).
+ *
  * @property value the parameter value (can be null)
- * @property mapping optional MyBatis type handler mapping (e.g., `"jdbcType=VARCHAR"`)
+ * @property mapping MyBatis type handler mappings as key-value pairs
  */
 data class VariableExpr(
     val value: Any?,
     val mapping: Map<String, String> = emptyMap(),
 ) : Expr {
+    /** Secondary constructor for backward compatibility with string-based mapping. */
     constructor(value: Any?, mapping: String?) : this(value, parseMapping(mapping))
     /**
      * Renders this variable as a MyBatis parameter placeholder.
@@ -41,17 +44,32 @@ data class VariableExpr(
      */
     override fun render(wrapper: AbstractWrapper<*, *, *>): String = Helper.wrapParam(wrapper, value, formatMapping(mapping))
 
+    /** Configures JDBC type for this parameter. */
     fun jdbcType(jdbcType: String) = mapping("jdbcType" to jdbcType)
+    
+    /** Configures Java type for this parameter. */
     fun javaType(javaType: Class<*>) = mapping("javaType" to javaType.name)
+    
+    /** Configures parameter mode (IN, OUT, INOUT). */
     fun mode(mode: String) = mapping("mode" to mode)
+    
+    /** Sets parameter mode to IN. */
     fun IN() = mode("IN")
+    
+    /** Sets parameter mode to OUT. */
     fun OUT() = mode("OUT")
+    
+    /** Configures numeric scale for decimal parameters. */
     fun numericScale(scale: Int) = mapping("numericScale" to scale.toString())
+    
+    /** Configures custom type handler for this parameter. */
     fun typeHandler(typeHandler: Class<*>) = mapping("typeHandler" to typeHandler.name)
 
+    /** Adds or updates mapping entries, returning a new VariableExpr. */
     fun mapping(vararg kv: Pair<String, String>) = VariableExpr(value, mergeMapping(mapping, *kv))
 
     companion object {
+        /** Parses string mapping (e.g., "jdbcType=VARCHAR,mode=IN") into a map. */
         private fun parseMapping(mapping: String?): Map<String, String> {
             return mapping?.splitToSequence(',').orEmpty()
                 .map { it.split('=',limit = 2) }
@@ -59,11 +77,13 @@ data class VariableExpr(
                 .toMap()
         }
 
+        /** Formats mapping map back to string for MyBatis. */
         private fun formatMapping(mapping: Map<String, String>): String? {
             if (mapping.isEmpty()) return null
             return mapping.entries.joinToString(",") { (key, value) -> "$key=$value" }
         }
 
+        /** Merges new key-value pairs into existing mapping. */
         private fun mergeMapping(mapping: Map<String, String>, vararg kv: Pair<String, String>) = mapping.plus(kv)
     }
 }

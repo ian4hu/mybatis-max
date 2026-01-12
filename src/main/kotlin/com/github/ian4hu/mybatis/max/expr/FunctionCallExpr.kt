@@ -24,8 +24,9 @@ import com.github.ian4hu.mybatis.max.Expr.Companion.variable
  * SQL function call expression.
  *
  * Renders as `function_name(arg1, arg2, ...)` with validated function name.
+ * Non-expression arguments are automatically wrapped as variables.
  *
- * @property fn the SQL function name
+ * @property fn the SQL function name (must be a valid identifier)
  * @property args the function arguments
  */
 data class FunctionCallExpr(
@@ -37,10 +38,17 @@ data class FunctionCallExpr(
         checkFunctionCall(this)
     }
 
+    /** Constructor accepting expression arguments. */
     constructor(fn: String, vararg args: Expr) : this(fn, listOf(*args)) {
         checkFunctionCall(this)
     }
 
+    /**
+     * Constructor accepting mixed arguments (expressions and values).
+     * Non-expression values are automatically wrapped as variables.
+     *
+     * @throws IllegalArgumentException if any argument is an Alias
+     */
     constructor(fn: String, vararg args: Any?) : this(fn, *args
         .mapIndexed { index, it ->
             if (it is Alias) {
@@ -61,6 +69,7 @@ data class FunctionCallExpr(
     }
 
     companion object {
+        /** Validates that the function name is a valid SQL identifier. */
         fun checkFunctionCall(fn: FunctionCallExpr) {
             if (!Alias.isValidIdentifier(fn.fn)) throw IllegalArgumentException("Invalid function name: '$fn'")
         }

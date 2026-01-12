@@ -65,7 +65,7 @@ data class LiteralExpr(
         /**
          * Checks if the value is a safe SQL literal.
          *
-         * Safe literals: SQL identifiers, numeric values, or boolean values.
+         * Safe literals: SQL identifiers or numeric values.
          */
         fun isSafeLiteral(value: String): Boolean = value.matches(IDENTIFIER_REGEX) ||
             value.matches(NUMERIC_REGEX)

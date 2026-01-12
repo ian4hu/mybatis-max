@@ -93,9 +93,8 @@ interface Expr : Renderable {
          * Accepted literal types:
          * - **SQL identifiers**: Column names, table names, keywords (e.g., `user_name`, `COUNT`, `NULL`)
          * - **Numeric values**: Integers, decimals, scientific notation (e.g., `42`, `3.14`, `1.23E10`)
-         * - **Boolean values**: `true` or `false` (case-insensitive)
          *
-         * **Valid**: `user_name`, `COUNT`, `42`, `3.14`, `true`, `NULL`
+         * **Valid**: `user_name`, `COUNT`, `42`, `3.14`, `NULL`
          *
          * **Invalid**: `user-name`, `1user`, `user name`, `user;DROP`, `'string'`
          *

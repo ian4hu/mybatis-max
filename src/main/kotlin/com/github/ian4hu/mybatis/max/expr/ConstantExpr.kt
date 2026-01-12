@@ -19,17 +19,13 @@ import com.baomidou.mybatisplus.core.conditions.AbstractWrapper
 import com.github.ian4hu.mybatis.max.Expr
 
 /**
- * Represents a constant value expression with intelligent rendering based on value type.
+ * Constant value expression with type-based rendering.
  *
- * Constants are rendered differently depending on their type:
- * - **Null values**: Rendered as the SQL keyword `NULL`
- * - **Primitive types** (boolean, byte, short, int, long, float, double) and their boxed equivalents:
- *   Rendered directly as SQL literals (e.g., `42`, `true`, `3.14`)
- * - **Non-primitive types** (strings, objects, collections, etc.): Treated as parameterized variables
- *   for security, preventing SQL injection
- *
- * This automatic type-based handling provides a convenient way to include values in SQL expressions
- * while maintaining security for complex types.
+ * Rendering strategy:
+ * - **Null**: Rendered as `NULL` keyword
+ * - **Boxed primitives**: Rendered as SQL literals (e.g., `42`, `true`, `3.14`)
+ * - **Safe strings**: If string matches literal patterns, rendered as literal
+ * - **Other types**: Treated as parameterized variables for security
  *
  * @property value the constant value (can be null)
  */
@@ -39,40 +35,29 @@ data class ConstantExpr(
     /**
      * Renders the constant value into appropriate SQL representation.
      *
-     * The rendering strategy depends on the value type:
-     * - Null → `NULL` keyword
-     * - Primitives/boxed primitives → Direct literal representation
-     * - Other types → Parameterized variable (safe from SQL injection)
-     *
-     * @param wrapper the MyBatis-Plus wrapper context used for rendering
-     * @return the SQL representation of this constant
+     * @param wrapper the MyBatis-Plus wrapper context
+     * @return the SQL representation
      */
     override fun render(wrapper: AbstractWrapper<*, *, *>): String {
         if (value == null) {
             return Expr.literal("NULL").render(wrapper)
         }
 
-        // Direct render primitive value
+        // Boxed primitives render as literals
         if (isBoxedPrimitive(value)) {
             return Expr.literal(value.toString()).render(wrapper)
         }
 
+        // Safe strings render as literals
         if (value is String && LiteralExpr.isSafeLiteral(value)) {
             return Expr.literal(value).render(wrapper)
         }
 
-        // Non primitive value will take as variable
+        // Everything else becomes a variable
         return Expr.variable(value).render(wrapper)
     }
 
-    /**
-     * Checks if the value is a boxed primitive wrapper type.
-     *
-     * Boxed primitives include: Boolean, Byte, Short, Int, Long, Float, Double.
-     *
-     * @param value the value to check
-     * @return true if the value is a boxed primitive type
-     */
+    /** Checks if the value is a boxed primitive type (Boolean, Byte, Short, Int, Long, Float, Double). */
     private fun isBoxedPrimitive(value: Any): Boolean = when (value) {
         is Boolean -> true
         is Byte -> true
