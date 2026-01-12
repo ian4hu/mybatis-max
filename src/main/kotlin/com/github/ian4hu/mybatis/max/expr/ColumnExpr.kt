@@ -22,9 +22,7 @@ import com.github.ian4hu.mybatis.max.Render
 /**
  * Column reference expression using string-based column name.
  *
- * The column name is validated and wrapped using MyBatis-Plus's column resolution.
- *
- * @property value the column name
+ * @property value the column name (validated as SQL identifier)
  */
 data class ColumnExpr(
     val value: String,

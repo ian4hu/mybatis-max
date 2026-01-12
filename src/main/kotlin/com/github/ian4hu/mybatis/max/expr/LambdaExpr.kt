@@ -32,13 +32,5 @@ import com.github.ian4hu.mybatis.max.Render
 data class LambdaExpr<T : Any>(
     val value: SFunction<T, *>,
 ) : Expr {
-    /**
-     * Renders this lambda reference as a SQL column name.
-     *
-     * Uses MyBatis-Plus's [Helper.wrapLambda] to extract the column name from the lambda.
-     *
-     * @param render the MyBatis-Plus wrapper context
-     * @return the database column name
-     */
     override fun render(render: Render): String = render.lambda(value)
 }

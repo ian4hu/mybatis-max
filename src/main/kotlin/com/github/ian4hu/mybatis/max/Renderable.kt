@@ -19,17 +19,16 @@ import com.baomidou.mybatisplus.core.conditions.AbstractWrapper
 import com.github.ian4hu.mybatis.max.expr.Alias
 
 /**
- * Represents an object that can be rendered into SQL fragments using a MyBatis-Plus wrapper.
+ * Represents an object that can be rendered into SQL fragments.
  *
- * Implementations provide SQL string generation within the context of a
- * [com.baomidou.mybatisplus.core.conditions.Wrapper], enabling integration
- * with MyBatis-Plus dynamic SQL generation.
+ * Implementations provide SQL string generation through the [Render] abstraction,
+ * enabling integration with MyBatis-Plus dynamic SQL generation.
  */
 interface Renderable {
     /**
      * Renders this object into a SQL fragment string.
      *
-     * @param render the MyBatis-Plus wrapper context used for SQL generation
+     * @param render the rendering context
      * @return the rendered SQL fragment
      */
     fun render(render: Render): String

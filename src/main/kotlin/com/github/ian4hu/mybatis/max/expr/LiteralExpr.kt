@@ -36,9 +36,6 @@ data class LiteralExpr(
         if (!isSafeLiteral(value)) throw IllegalArgumentException("'$value' is not a valid literal. Only SQL identifiers, numbers, and booleans are allowed.")
     }
 
-    /**
-     * Renders the literal value directly into SQL.
-     */
     override fun render(render: Render): String = value
 
     companion object {

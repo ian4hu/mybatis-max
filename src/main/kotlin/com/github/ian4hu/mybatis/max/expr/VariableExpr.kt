@@ -37,12 +37,6 @@ data class VariableExpr(
     /** Secondary constructor for backward compatibility with string-based mapping. */
     constructor(value: Any?, mapping: String?) : this(value, parseMapping(mapping))
 
-    /**
-     * Renders this variable as a MyBatis parameter placeholder.
-     *
-     * @param render the MyBatis-Plus wrapper context
-     * @return a MyBatis parameter placeholder string
-     */
     override fun render(render: Render): String = render.formatParam(value, formatMapping(mapping))
 
     /** Configures JDBC type for this parameter. */

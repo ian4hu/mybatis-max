@@ -19,16 +19,22 @@ import com.baomidou.mybatisplus.core.toolkit.support.SFunction
 import kotlin.reflect.KProperty1
 
 /**
- * @author ian
- * @date 2026/01/12
+ * Abstraction for rendering SQL expressions into string representations.
+ *
+ * This interface decouples expression rendering from MyBatis-Plus's wrapper implementation,
+ * enabling alternative rendering strategies and better testability.
  */
 interface Render {
 
+    /** Renders a column name to SQL. */
     fun column(column: String): String
 
+    /** Renders a lambda method reference to SQL column name. */
     fun lambda(lambda: SFunction<*, *>): String
 
+    /** Renders a Kotlin property reference to SQL column name. */
     fun <T> kotlinProperty(property: KProperty1<T, *>, entityClass: Class<T>): String
 
+    /** Formats a parameter value with optional type mapping as MyBatis placeholder. */
     fun formatParam(param: Any?, mapping: String?): String
 }

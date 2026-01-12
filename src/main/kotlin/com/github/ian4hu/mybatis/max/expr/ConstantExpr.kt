@@ -32,12 +32,6 @@ import com.github.ian4hu.mybatis.max.Render
 data class ConstantExpr(
     val value: Any?,
 ) : Expr {
-    /**
-     * Renders the constant value into appropriate SQL representation.
-     *
-     * @param render the MyBatis-Plus wrapper context
-     * @return the SQL representation
-     */
     override fun render(render: Render): String {
         if (value == null) {
             return Expr.literal("NULL").render(render)
