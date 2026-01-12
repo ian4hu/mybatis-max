@@ -42,53 +42,60 @@ import kotlin.reflect.KProperty1
  *   Expression will render to SQL snippet, and be used
  */
 interface Expr<T> : Renderable<T> {
-
     companion object {
-
-        @JvmStatic
-        fun column(value: String): Expr<String> = ColumnExpr(value)
+        @JvmStatic fun column(value: String): Expr<String> = ColumnExpr(value)
 
         @JvmStatic
         fun <I, O> lambda(value: SFunction<I, O>): Expr<SFunction<*, *>> = LambdaExpr<I, O>(value)
 
-        inline fun <reified T> kotlinProperty(value: KProperty1<T, *>): Expr<KProperty1<T, *>> =
-            kotlinProperty(value, T::class.java)
+        inline fun <reified T> kotlinProperty(value: KProperty1<T, *>): Expr<KProperty1<T, *>> = kotlinProperty(value, T::class.java)
 
-        fun <T> kotlinProperty(value: KProperty1<T, *>, entityClass: Class<T>): Expr<KProperty1<T, *>> =
-            KotlinPropertyExpr(value, entityClass)
+        fun <T> kotlinProperty(
+            value: KProperty1<T, *>,
+            entityClass: Class<T>,
+        ): Expr<KProperty1<T, *>> = KotlinPropertyExpr(value, entityClass)
 
-        @JvmStatic
-        fun literal(value: String): Expr<String> = LiteralExpr(value)
+        @JvmStatic fun literal(value: String): Expr<String> = LiteralExpr(value)
 
-        @JvmStatic
-        fun constant(value: Any?): Expr<*> = Constant(value)
-
-        @JvmStatic
-        fun variable(value: Any?, mapping: String? = null): Expr<*> = VariableExpr(value, mapping)
+        @JvmStatic fun constant(value: Any?): Expr<*> = Constant(value)
 
         @JvmStatic
-        fun functionCall(fn: String, vararg args: Any?): Expr<*> =
+        fun variable(
+            value: Any?,
+            mapping: String? = null,
+        ): Expr<*> = VariableExpr(value, mapping)
+
+        @JvmStatic
+        fun functionCall(
+            fn: String,
+            vararg args: Any?,
+        ): Expr<*> =
             FunctionCallExpr(
                 fn,
                 *args
                     .mapIndexed { index, it ->
-                        if (it is Alias<*>)
+                        if (it is Alias<*>) {
                             throw IllegalArgumentException(
-                                "Function parameter #$index: Alias can not as function parameter."
+                                "Function parameter #$index: Alias can not as function parameter.",
                             )
+                        }
                         it as? Expr<*> ?: variable(it)
-                    }
-                    .toTypedArray(),
+                    }.toTypedArray(),
             )
 
-        @JvmStatic
-        fun and(a: Expr<*>, b: Expr<*>, vararg others: Expr<*>): Expr<*> = a.and(b, *others)
+        @JvmStatic fun and(
+            a: Expr<*>,
+            b: Expr<*>,
+            vararg others: Expr<*>,
+        ): Expr<*> = a.and(b, *others)
 
-        @JvmStatic
-        fun or(a: Expr<*>, b: Expr<*>, vararg others: Expr<*>): Expr<*> = a.or(b, *others)
+        @JvmStatic fun or(
+            a: Expr<*>,
+            b: Expr<*>,
+            vararg others: Expr<*>,
+        ): Expr<*> = a.or(b, *others)
 
-        @JvmStatic
-        fun not(a: Expr<*>): Expr<*> = a.not()
+        @JvmStatic fun not(a: Expr<*>): Expr<*> = a.not()
     }
 
     fun and(vararg expr: Expr<*>): Expr<*> {
@@ -111,4 +118,3 @@ interface Expr<T> : Renderable<T> {
 
     fun not(): Expr<T> = if (this is NotExpr<T>) this.expr else NotExpr(this)
 }
-

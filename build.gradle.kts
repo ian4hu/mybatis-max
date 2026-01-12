@@ -49,9 +49,11 @@ spotless {
     }
 
     kotlin {
-        ktfmt()
-        licenseHeaderFile(rootProject.file("LICENSE_HEADER"))
+        ktlint()
         trimTrailingWhitespace()
+        indentWithSpaces()
+        endWithNewline()
+        licenseHeaderFile(rootProject.file("LICENSE_HEADER"))
     }
 }
 
