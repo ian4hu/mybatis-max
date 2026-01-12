@@ -29,10 +29,10 @@ interface Renderable {
     /**
      * Renders this object into a SQL fragment string.
      *
-     * @param wrapper the MyBatis-Plus wrapper context used for SQL generation
+     * @param render the MyBatis-Plus wrapper context used for SQL generation
      * @return the rendered SQL fragment
      */
-    fun render(wrapper: AbstractWrapper<*, *, *>): String
+    fun render(render: Render): String
 
     /**
      * Creates an aliased version of this renderable object for use in SQL queries.

@@ -28,8 +28,9 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.github.ian4hu.mybatis.max.entity.BlockStorageDBO;
 
-import kotlin.Pair;
 import org.junit.jupiter.api.Test;
+
+import kotlin.Pair;
 
 public class JavaExprTest implements MybatisBootstrap {
 	@Test
@@ -46,7 +47,7 @@ public class JavaExprTest implements MybatisBootstrap {
 		for (Map.Entry<Object, String> entry : map.entrySet()) {
 			Object value = entry.getKey();
 			String expr = entry.getValue();
-			String result = Expr.constant(value).render(Wrappers.query());
+			String result = Expr.constant(value).render(new WrapperRender(Wrappers.query()));
 			assertEquals(expr, result);
 		}
 	}
@@ -54,22 +55,23 @@ public class JavaExprTest implements MybatisBootstrap {
 	@Test
 	public void testNonePrimitiveConstant() {
 		QueryWrapper<Object> wrapper = Wrappers.query();
-		String result = Expr.constant("1x1").render(wrapper);
+		WrapperRender render = new WrapperRender(wrapper);
+		String result = Expr.constant("1x1").render(render);
 		assertEquals("#{ew.paramNameValuePairs.MPGENVAL1}", result);
 		assertEquals("1x1", wrapper.getParamNameValuePairs().get("MPGENVAL1"));
 
-		String NULL = Expr.constant("NULL").render(wrapper);
+		String NULL = Expr.constant("NULL").render(render);
 		assertEquals("NULL", NULL);
 
-		String num = Expr.constant("1.23E10").render(wrapper);
+		String num = Expr.constant("1.23E10").render(render);
 		assertEquals("1.23E10", num);
 
-		String notSafeStr = Expr.constant("'hello world'").render(wrapper);
+		String notSafeStr = Expr.constant("'hello world'").render(render);
 		assertEquals("#{ew.paramNameValuePairs.MPGENVAL2}", notSafeStr);
 		assertEquals("'hello world'", wrapper.getParamNameValuePairs().get("MPGENVAL2"));
 
 		Pair<String, String> param = new Pair<>("A", "B");
-		String objParam = Expr.constant(param).render(wrapper);
+		String objParam = Expr.constant(param).render(render);
 		assertEquals("#{ew.paramNameValuePairs.MPGENVAL3}", objParam);
 		assertEquals(param, wrapper.getParamNameValuePairs().get("MPGENVAL3"));
 	}
@@ -79,7 +81,7 @@ public class JavaExprTest implements MybatisBootstrap {
 		List<Supplier<AbstractWrapper<?, ?, ?>>> wrappers = Arrays.asList(Wrappers::query,
 			() -> Wrappers.lambdaQuery(BlockStorageDBO.class));
 		for (Supplier<AbstractWrapper<?, ?, ?>> wrapper : wrappers) {
-			String result = Expr.lambda(BlockStorageDBO::getOutBizId).render(wrapper.get());
+			String result = Expr.lambda(BlockStorageDBO::getOutBizId).render(new WrapperRender(wrapper.get()));
 			assertEquals("out_biz_id", result);
 		}
 	}

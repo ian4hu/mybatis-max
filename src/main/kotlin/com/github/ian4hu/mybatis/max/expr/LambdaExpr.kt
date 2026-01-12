@@ -15,10 +15,10 @@
  */
 package com.github.ian4hu.mybatis.max.expr
 
-import com.baomidou.mybatisplus.core.conditions.AbstractWrapper
 import com.baomidou.mybatisplus.core.conditions.Helper
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction
 import com.github.ian4hu.mybatis.max.Expr
+import com.github.ian4hu.mybatis.max.Render
 
 /**
  * Column reference expression using MyBatis-Plus lambda method references.
@@ -37,8 +37,8 @@ data class LambdaExpr<T : Any>(
      *
      * Uses MyBatis-Plus's [Helper.wrapLambda] to extract the column name from the lambda.
      *
-     * @param wrapper the MyBatis-Plus wrapper context
+     * @param render the MyBatis-Plus wrapper context
      * @return the database column name
      */
-    override fun render(wrapper: AbstractWrapper<*, *, *>): String = Helper.wrapLambda(wrapper, value)
+    override fun render(render: Render): String = render.lambda(value)
 }

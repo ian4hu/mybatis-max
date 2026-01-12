@@ -15,8 +15,8 @@
  */
 package com.github.ian4hu.mybatis.max.expr
 
-import com.baomidou.mybatisplus.core.conditions.AbstractWrapper
 import com.github.ian4hu.mybatis.max.Expr
+import com.github.ian4hu.mybatis.max.Render
 
 /**
  * Literal SQL expression that renders directly without escaping.
@@ -39,7 +39,7 @@ data class LiteralExpr(
     /**
      * Renders the literal value directly into SQL.
      */
-    override fun render(wrapper: AbstractWrapper<*, *, *>): String = value
+    override fun render(render: Render): String = value
 
     companion object {
         /**

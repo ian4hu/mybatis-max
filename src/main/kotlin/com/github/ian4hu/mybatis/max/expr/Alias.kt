@@ -15,8 +15,7 @@
  */
 package com.github.ian4hu.mybatis.max.expr
 
-import com.baomidou.mybatisplus.core.conditions.AbstractWrapper
-import com.github.ian4hu.mybatis.max.Expr
+import com.github.ian4hu.mybatis.max.Render
 import com.github.ian4hu.mybatis.max.Renderable
 
 /**
@@ -48,11 +47,11 @@ data class Alias(
      * Composite expressions are wrapped in parentheses. If the alias is blank,
      * only the expression is rendered. Otherwise, renders as "expression AS alias".
      *
-     * @param wrapper the MyBatis-Plus wrapper context used for SQL generation
+     * @param render the MyBatis-Plus wrapper context used for SQL generation
      * @return the rendered SQL fragment with optional alias
      */
-    override fun render(wrapper: AbstractWrapper<*, *, *>): String {
-        val rendered = if (expr is CompositeExpr) "(${expr.render(wrapper)})" else expr.render(wrapper)
+    override fun render(render: Render): String {
+        val rendered = if (expr is CompositeExpr) "(${expr.render(render)})" else expr.render(render)
         return if (alias.isBlank()) rendered else "$rendered AS $alias"
     }
 

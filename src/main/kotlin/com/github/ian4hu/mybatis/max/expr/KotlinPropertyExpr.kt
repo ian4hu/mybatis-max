@@ -15,9 +15,9 @@
  */
 package com.github.ian4hu.mybatis.max.expr
 
-import com.baomidou.mybatisplus.core.conditions.AbstractWrapper
 import com.baomidou.mybatisplus.core.conditions.Helper
 import com.github.ian4hu.mybatis.max.Expr
+import com.github.ian4hu.mybatis.max.Render
 import kotlin.reflect.KProperty1
 
 /**
@@ -33,5 +33,5 @@ data class KotlinPropertyExpr<T>(
     val value: KProperty1<T, *>,
     val entityClass: Class<T>,
 ) : Expr {
-    override fun render(wrapper: AbstractWrapper<*, *, *>): String = Helper.wrapProperty(wrapper, value, entityClass)
+    override fun render(render: Render): String = render.kotlinProperty(value, entityClass)
 }

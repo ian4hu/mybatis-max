@@ -15,8 +15,8 @@
  */
 package com.github.ian4hu.mybatis.max.expr
 
-import com.baomidou.mybatisplus.core.conditions.AbstractWrapper
 import com.github.ian4hu.mybatis.max.Expr
+import com.github.ian4hu.mybatis.max.Render
 
 /**
  * Constant value expression with type-based rendering.
@@ -35,26 +35,26 @@ data class ConstantExpr(
     /**
      * Renders the constant value into appropriate SQL representation.
      *
-     * @param wrapper the MyBatis-Plus wrapper context
+     * @param render the MyBatis-Plus wrapper context
      * @return the SQL representation
      */
-    override fun render(wrapper: AbstractWrapper<*, *, *>): String {
+    override fun render(render: Render): String {
         if (value == null) {
-            return Expr.literal("NULL").render(wrapper)
+            return Expr.literal("NULL").render(render)
         }
 
         // Boxed primitives render as literals
         if (isBoxedPrimitive(value)) {
-            return Expr.literal(value.toString()).render(wrapper)
+            return Expr.literal(value.toString()).render(render)
         }
 
         // Safe strings render as literals
         if (value is String && LiteralExpr.isSafeLiteral(value)) {
-            return Expr.literal(value).render(wrapper)
+            return Expr.literal(value).render(render)
         }
 
         // Everything else becomes a variable
-        return Expr.variable(value).render(wrapper)
+        return Expr.variable(value).render(render)
     }
 
     /** Checks if the value is a boxed primitive type (Boolean, Byte, Short, Int, Long, Float, Double). */

@@ -15,8 +15,8 @@
  */
 package com.github.ian4hu.mybatis.max.expr
 
-import com.baomidou.mybatisplus.core.conditions.AbstractWrapper
 import com.github.ian4hu.mybatis.max.Expr
+import com.github.ian4hu.mybatis.max.Render
 
 /**
  * Logical AND expression that combines multiple expressions.
@@ -30,11 +30,11 @@ import com.github.ian4hu.mybatis.max.Expr
 data class AndExpr private constructor(
     val elements: List<Expr>,
 ) : CompositeExpr {
-    override fun render(wrapper: AbstractWrapper<*, *, *>): String = elements.joinToString(" AND ") {
+    override fun render(render: Render): String = elements.joinToString(" AND ") {
         if (it is CompositeExpr) {
-            "(${it.render(wrapper)})"
+            "(${it.render(render)})"
         } else {
-            it.render(wrapper)
+            it.render(render)
         }
     }
 

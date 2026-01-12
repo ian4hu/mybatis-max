@@ -52,7 +52,7 @@ class ExprTest : MybatisBootstrap {
     @Test
     fun render() {
         val wrapper = Wrappers.query<Any>()
-        val concat = functionCall("concat", "A", "B", "C", null).render(wrapper)
+        val concat = functionCall("concat", "A", "B", "C", null).render(WrapperRender(wrapper))
         Assertions.assertEquals(
             "concat(#{ew.paramNameValuePairs.MPGENVAL1},#{ew.paramNameValuePairs.MPGENVAL2},#{ew.paramNameValuePairs.MPGENVAL3},#{ew.paramNameValuePairs.MPGENVAL4})",
             concat,
@@ -62,7 +62,7 @@ class ExprTest : MybatisBootstrap {
         Assertions.assertEquals("C", wrapper.paramNameValuePairs["MPGENVAL3"])
         Assertions.assertNull(wrapper.paramNameValuePairs["MPGENVAL4"])
 
-        val currentTimestamp = functionCall("current_timestamp").render(Wrappers.query<Any>())
+        val currentTimestamp = functionCall("current_timestamp").render(WrapperRender(Wrappers.query<Any>()))
         Assertions.assertEquals("current_timestamp()", currentTimestamp)
 
         val functionCall =
@@ -77,13 +77,13 @@ class ExprTest : MybatisBootstrap {
                 constant(null),
                 ConstantExpr(Double.valueOf("10")),
             )
-        val wmConcat = functionCall.render(Wrappers.query<Any>())
+        val wmConcat = functionCall.render(WrapperRender(Wrappers.query<Any>()))
         val exprStr =
             "wm_concat(1,metadata,true,A,id,out_biz_id,NULL,10.0)"
         Assertions.assertEquals(exprStr, wmConcat)
-        Assertions.assertEquals(exprStr, functionCall.render(Wrappers.query<Any>()))
+        Assertions.assertEquals(exprStr, functionCall.render(WrapperRender(Wrappers.query<Any>())))
         val aliasedFunctionCall = functionCall.alias("expr")
-        Assertions.assertEquals("$exprStr AS expr", aliasedFunctionCall.render(Wrappers.query<Any>()))
+        Assertions.assertEquals("$exprStr AS expr", aliasedFunctionCall.render(WrapperRender(Wrappers.query<Any>())))
     }
 
     @Test
@@ -93,10 +93,10 @@ class ExprTest : MybatisBootstrap {
 
         val expr = not(and(andExpr, andExpr, or(orExpr, orExpr, andExpr))).not().not()
 
-        val exprStr = expr.render(Wrappers.query<Any>())
+        val exprStr = expr.render(WrapperRender(Wrappers.query<Any>()))
         Assertions.assertEquals("NOT (A AND B AND C AND (C OR D OR E OR (A AND B AND C)))", exprStr)
         val alias = expr.alias("expr")
-        Assertions.assertEquals("($exprStr) AS expr", alias.render(Wrappers.query<Any>()))
+        Assertions.assertEquals("($exprStr) AS expr", alias.render(WrapperRender(Wrappers.query<Any>())))
     }
 
     companion object {
@@ -204,7 +204,7 @@ class ExprTest : MybatisBootstrap {
             )
 
         for ((k, v) in properties) {
-            val result = kotlinProperty(k).render(wrapper)
+            val result = kotlinProperty(k).render(WrapperRender(wrapper))
             assertEquals(v, result)
         }
     }
@@ -216,7 +216,7 @@ class ExprTest : MybatisBootstrap {
         wrapper: AbstractWrapper<*, *, *>,
     ) {
         val literal = "current_timestamp"
-        val result = literal(literal).render(wrapper)
+        val result = literal(literal).render(WrapperRender(wrapper))
         assertEquals(literal, result)
     }
 
@@ -228,7 +228,7 @@ class ExprTest : MybatisBootstrap {
     ) {
         assertFailsWith(IllegalArgumentException::class) {
             val literal = "A';DROP"
-            literal(literal).render(wrapper)
+            literal(literal).render(WrapperRender(wrapper))
         }
     }
 
@@ -238,11 +238,11 @@ class ExprTest : MybatisBootstrap {
         name: String,
         wrapper: AbstractWrapper<*, *, *>,
     ) {
-        val result = Expr.variable(name).render(wrapper)
+        val result = Expr.variable(name).render(WrapperRender(wrapper))
         assertEquals("#{ew.paramNameValuePairs.MPGENVAL1}", result)
         assertEquals(name, wrapper.paramNameValuePairs["MPGENVAL1"])
 
-        val varWithJdbcType = Expr.variable(name, "jdbcType=VARCHAR").render(wrapper)
+        val varWithJdbcType = Expr.variable(name, "jdbcType=VARCHAR").render(WrapperRender(wrapper))
         assertEquals("#{ew.paramNameValuePairs.MPGENVAL2,jdbcType=VARCHAR}", varWithJdbcType)
 
         val varWithMapping = Expr.variable(name)
@@ -252,11 +252,14 @@ class ExprTest : MybatisBootstrap {
             .modeOut()
             .modeIn()
             .numericScale(6)
-            .render(wrapper)
+            .render(WrapperRender(wrapper))
         assertEquals("#{ew.paramNameValuePairs.MPGENVAL3,jdbcType=BIGINT,javaType=long,typeHandler=org.apache.ibatis.type.BigIntegerTypeHandler,mode=IN,numericScale=6}", varWithMapping)
 
-        val varWithStringMapping = Expr.variable(name, "jdbcType=BIGINT,javaType=long,typeHandler=org.apache.ibatis.type.BigIntegerTypeHandler,mode=IN,numericScale=6")
-            .render(wrapper)
+        val varWithStringMapping = Expr.variable(
+            name,
+            "jdbcType=BIGINT,javaType=long,typeHandler=org.apache.ibatis.type.BigIntegerTypeHandler,mode=IN,numericScale=6",
+        )
+            .render(WrapperRender(wrapper))
         assertEquals("#{ew.paramNameValuePairs.MPGENVAL4,jdbcType=BIGINT,javaType=long,typeHandler=org.apache.ibatis.type.BigIntegerTypeHandler,mode=IN,numericScale=6}", varWithStringMapping)
     }
 
@@ -269,7 +272,7 @@ class ExprTest : MybatisBootstrap {
         args: List<Any?>,
         expected: String,
     ) {
-        val result = functionCall(fn, *args.toTypedArray()).render(wrapper)
+        val result = functionCall(fn, *args.toTypedArray()).render(WrapperRender(wrapper))
         assertEquals(expected, result)
     }
 
@@ -311,7 +314,7 @@ class ExprTest : MybatisBootstrap {
         expr: Renderable,
         expected: String,
     ) {
-        val result = expr.render(wrapper)
+        val result = expr.render(WrapperRender(wrapper))
         assertEquals(expected, result)
     }
 }

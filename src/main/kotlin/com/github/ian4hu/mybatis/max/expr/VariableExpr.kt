@@ -15,9 +15,9 @@
  */
 package com.github.ian4hu.mybatis.max.expr
 
-import com.baomidou.mybatisplus.core.conditions.AbstractWrapper
 import com.baomidou.mybatisplus.core.conditions.Helper
 import com.github.ian4hu.mybatis.max.Expr
+import com.github.ian4hu.mybatis.max.Render
 
 /**
  * Parameterized variable expression safely bound to PreparedStatement.
@@ -40,10 +40,10 @@ data class VariableExpr(
     /**
      * Renders this variable as a MyBatis parameter placeholder.
      *
-     * @param wrapper the MyBatis-Plus wrapper context
+     * @param render the MyBatis-Plus wrapper context
      * @return a MyBatis parameter placeholder string
      */
-    override fun render(wrapper: AbstractWrapper<*, *, *>): String = Helper.wrapParam(wrapper, value, formatMapping(mapping))
+    override fun render(render: Render): String = render.formatParam(value, formatMapping(mapping))
 
     /** Configures JDBC type for this parameter. */
     fun jdbcType(jdbcType: String) = mapping("jdbcType" to jdbcType)

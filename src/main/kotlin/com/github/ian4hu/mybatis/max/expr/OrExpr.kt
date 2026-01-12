@@ -15,8 +15,8 @@
  */
 package com.github.ian4hu.mybatis.max.expr
 
-import com.baomidou.mybatisplus.core.conditions.AbstractWrapper
 import com.github.ian4hu.mybatis.max.Expr
+import com.github.ian4hu.mybatis.max.Render
 
 /**
  * Logical OR expression that combines multiple expressions.
@@ -30,11 +30,11 @@ import com.github.ian4hu.mybatis.max.Expr
 data class OrExpr private constructor(
     val elements: List<Expr>,
 ) : CompositeExpr {
-    override fun render(wrapper: AbstractWrapper<*, *, *>): String = elements.joinToString(" OR ") {
+    override fun render(render: Render): String = elements.joinToString(" OR ") {
         if (it is CompositeExpr) {
-            "(${it.render(wrapper)})"
+            "(${it.render(render)})"
         } else {
-            it.render(wrapper)
+            it.render(render)
         }
     }
 

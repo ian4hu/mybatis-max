@@ -15,8 +15,8 @@
  */
 package com.github.ian4hu.mybatis.max.expr
 
-import com.baomidou.mybatisplus.core.conditions.AbstractWrapper
 import com.github.ian4hu.mybatis.max.Expr
+import com.github.ian4hu.mybatis.max.Render
 
 /**
  * Logical NOT expression that negates another expression.
@@ -30,7 +30,13 @@ import com.github.ian4hu.mybatis.max.Expr
 data class NotExpr private constructor(
     val expr: Expr,
 ) : CompositeExpr {
-    override fun render(wrapper: AbstractWrapper<*, *, *>): String = if (expr is CompositeExpr) "NOT (${expr.render(wrapper)})" else "NOT ${expr.render(wrapper)}"
+    override fun render(render: Render): String = if (expr is CompositeExpr) {
+        "NOT (${expr.render(render)})"
+    } else {
+        "NOT ${expr.render(
+            render,
+        )}"
+    }
 
     companion object {
         /** Creates a NOT expression, eliminating double negation if present. */

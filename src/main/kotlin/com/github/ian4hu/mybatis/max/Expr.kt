@@ -16,7 +16,6 @@
 package com.github.ian4hu.mybatis.max
 
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction
-import com.github.ian4hu.mybatis.max.expr.Alias
 import com.github.ian4hu.mybatis.max.expr.AndExpr
 import com.github.ian4hu.mybatis.max.expr.ColumnExpr
 import com.github.ian4hu.mybatis.max.expr.ConstantExpr

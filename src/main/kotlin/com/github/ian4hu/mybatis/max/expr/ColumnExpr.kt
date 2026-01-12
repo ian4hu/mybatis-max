@@ -15,9 +15,9 @@
  */
 package com.github.ian4hu.mybatis.max.expr
 
-import com.baomidou.mybatisplus.core.conditions.AbstractWrapper
 import com.baomidou.mybatisplus.core.conditions.Helper
 import com.github.ian4hu.mybatis.max.Expr
+import com.github.ian4hu.mybatis.max.Render
 
 /**
  * Column reference expression using string-based column name.
@@ -32,5 +32,5 @@ data class ColumnExpr(
     init {
         if (!Alias.isValidIdentifier(value)) throw IllegalArgumentException("'$value' is not valid column name")
     }
-    override fun render(wrapper: AbstractWrapper<*, *, *>): String = Helper.wrapColumn(wrapper, value)
+    override fun render(render: Render): String = render.column(value)
 }
