@@ -20,7 +20,10 @@ import com.github.ian4hu.mybatis.max.conditions.ComparisonCondition
 /**
  * SQL comparison operators for building conditional expressions.
  *
- * Each operator corresponds to a standard SQL comparison operator.
+ * Supported operators:
+ * - Equality: `=`, `<=>`
+ * - Inequality: `<>`
+ * - Relational: `>`, `>=`, `<`, `<=`
  *
  * @property op the SQL operator symbol
  */

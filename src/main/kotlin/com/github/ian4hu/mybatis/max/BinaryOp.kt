@@ -20,7 +20,9 @@ import com.github.ian4hu.mybatis.max.expr.BiExpr
 /**
  * Binary operators for combining expressions.
  *
- * Includes logical operators (AND, OR, XOR) and bitwise operators (&, |, ^).
+ * Supported operators:
+ * - Logical: AND, OR, XOR
+ * - Bitwise: &, |, ^
  *
  * @property op the SQL operator keyword or symbol
  */

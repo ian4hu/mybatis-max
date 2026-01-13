@@ -19,15 +19,16 @@ import com.github.ian4hu.mybatis.max.Condition
 import com.github.ian4hu.mybatis.max.Expr
 
 /**
- * Dummy condition for SQL expression. like boolean column, boolean literal, etc.
+ * Dummy condition wrapper for raw SQL expressions.
+ *
+ * Wraps expressions that are already valid boolean conditions (e.g., boolean columns,
+ * boolean literals, or function calls returning boolean) to satisfy the Condition interface.
  */
 internal class DummyCondition(val condition: Expr) :
     Condition,
     Expr by condition {
     companion object {
-        /**
-         * Convert expression to dummy condition when necessary.
-         */
+        /** Converts an expression to a Condition, creating a DummyCondition wrapper if needed. */
         internal fun of(expr: Expr): Condition = expr as? Condition ?: DummyCondition(expr)
     }
 }

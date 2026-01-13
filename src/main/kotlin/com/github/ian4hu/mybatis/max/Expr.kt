@@ -177,6 +177,14 @@ interface Expr : Renderable {
          */
         @JvmStatic fun not(a: Expr): Condition = a.not()
 
+        /**
+         * Combines multiple expressions using XOR.
+         *
+         * @param a the first expression
+         * @param b the second expression
+         * @param others additional expressions
+         * @return XOR expression
+         */
         @JvmStatic fun xor(a: Expr, b: Expr, vararg others: Expr): Condition = a.xor(b, *others)
     }
 
@@ -191,6 +199,13 @@ interface Expr : Renderable {
      */
     fun and(b: Expr, vararg expr: Expr): Condition = BinaryOp.AND.of(this, b, *expr)
 
+    /**
+     * Combines this expression with others using XOR.
+     *
+     * @param b the second expression
+     * @param expr additional expressions
+     * @return XOR expression
+     */
     fun xor(b: Expr, vararg expr: Expr): Condition = BinaryOp.XOR.of(this, b, *expr)
 
     /**
@@ -213,15 +228,19 @@ interface Expr : Renderable {
      */
     fun not(): Condition = UnaryBooleanOp.NOT.of(this)
 
+    /** Creates a NOT NULL condition: `a IS NOT NULL` */
     fun isNotNull(): Condition = isNull().not()
 
+    /** Creates a NULL condition: `a IS NULL` */
     fun isNull(): Condition = UnaryBooleanOp.IS_NULL.of(this)
 
+    /** Creates a boolean check condition: `IS TRUE`, `IS FALSE`, or `IS UNKNOWN` */
     fun isBool(bool: Boolean?): Condition = when (bool) {
         null -> UnaryBooleanOp.IS_UNKNOWN.of(this)
         true -> UnaryBooleanOp.IS_TRUE.of(this)
         else -> UnaryBooleanOp.IS_FLASE.of(this)
     }
 
+    /** Creates a negated boolean check condition */
     fun isNotBool(bool: Boolean?): Condition = isBool(bool).not()
 }

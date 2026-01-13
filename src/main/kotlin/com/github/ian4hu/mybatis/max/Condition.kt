@@ -19,7 +19,7 @@ package com.github.ian4hu.mybatis.max
  * Represents a conditional expression for SQL WHERE clauses.
  *
  * Conditions are expressions that evaluate to boolean values in SQL.
- * Use comparison operators (eq, ne, gt, etc.) to build conditions.
+ * Use comparison operators (eq, ne, gt, etc.) or logical operators (and, or, not) to build conditions.
  */
 interface Condition : Expr
 

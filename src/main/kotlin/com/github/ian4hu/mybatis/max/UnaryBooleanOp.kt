@@ -20,7 +20,10 @@ import com.github.ian4hu.mybatis.max.expr.UnaryBooleanExpr
 /**
  * Unary boolean operators for SQL expressions.
  *
- * Includes logical NOT and SQL-specific predicates (IS NULL, IS TRUE, etc.).
+ * Supported operators:
+ * - Logical: NOT
+ * - SQL predicates: IS NULL, IS TRUE, IS FALSE, IS UNKNOWN (and their negations)
+ * - DUMMY: No-op operator for optimization
  *
  * @property op the SQL operator keyword
  * @property inverseOp the inverse operator (NOT negates to DUMMY, IS NULL to IS NOT NULL, etc.)

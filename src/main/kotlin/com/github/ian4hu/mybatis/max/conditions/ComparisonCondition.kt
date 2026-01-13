@@ -21,13 +21,20 @@ import com.github.ian4hu.mybatis.max.Expr
 import com.github.ian4hu.mybatis.max.Render
 
 /**
- * Binary comparison condition.
+ * Binary comparison condition for SQL WHERE clauses.
  *
- * Renders as: `left operator right` (e.g., `age >= 18`).
+ * Represents a comparison between two expressions using standard SQL comparison operators.
+ * The condition renders as: `left operator right`
  *
- * @property op the comparison operator
- * @property left the left operand
- * @property right the right operand
+ * Examples:
+ * - `age >= 18` - age greater than or equal to 18
+ * - `name = 'John'` - name equals 'John'
+ * - `price <> 0` - price not equal to 0
+ * - `score <=> NULL` - null-safe equality check
+ *
+ * @property op the comparison operator (=, <>, >, >=, <, <=, <=>)
+ * @property left the left operand expression
+ * @property right the right operand expression
  */
 data class ComparisonCondition(val op: ComparisonOp, val left: Expr, val right: Expr) : Condition {
     override fun render(render: Render): String = arrayOf(left, right)

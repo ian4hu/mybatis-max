@@ -23,7 +23,7 @@ import com.github.ian4hu.mybatis.max.Render
  *
  * Rendering strategy:
  * - **Null**: Rendered as `NULL` keyword
- * - **Boxed primitives**: Rendered as SQL literals (e.g., `42`, `true`, `3.14`)
+ * - **Boxed primitives** (Boolean, Byte, Short, Int, Long, Float, Double): Rendered as SQL literals (e.g., `42`, `true`, `3.14`)
  * - **Safe strings**: If string matches literal patterns, rendered as literal
  * - **Other types**: Treated as parameterized variables for security
  *

@@ -26,7 +26,6 @@ import com.github.ian4hu.mybatis.max.Condition
 import com.github.ian4hu.mybatis.max.Expr
 import com.github.ian4hu.mybatis.max.Render
 import com.github.ian4hu.mybatis.max.Renderable
-import kotlin.math.exp
 import kotlin.reflect.KProperty1
 
 /**
