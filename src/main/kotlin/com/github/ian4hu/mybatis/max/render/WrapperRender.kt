@@ -48,12 +48,20 @@ class WrapperRender(val wrapper: AbstractWrapper<*, *, *>) : Render {
 }
 
 /**
- * Add select clause by condition
+ * Conditionally adds select fields based on boolean flags.
+ *
+ * Only fields with `true` condition are included in the SELECT clause.
+ *
+ * @param fields pairs of (field, includeCondition)
+ * @return this wrapper for chaining
  */
 fun <T> T.addSelect(vararg fields: Pair<Renderable, Boolean>): T where T : AbstractWrapper<*, *, T>, T : Query<*, *, *> = this.addSelect(*fields.filter { it.second }.map { it.first }.toTypedArray())
 
 /**
- * Clear current select clause
+ * Clears the SELECT clause from the query.
+ *
+ * @param condition if true, clears the SELECT clause; otherwise, no-op
+ * @return this wrapper for chaining
  */
 fun <T> T.clearSelect(condition: Boolean = true): T where T : AbstractWrapper<*, *, T>, T : Query<*, *, *> {
     if (condition) {
@@ -63,7 +71,12 @@ fun <T> T.clearSelect(condition: Boolean = true): T where T : AbstractWrapper<*,
 }
 
 /**
- * Add select fields by [Renderable]
+ * Adds custom select fields using [Renderable] expressions.
+ *
+ * Renders each field and appends to the existing SELECT clause.
+ *
+ * @param fields the renderable fields to add
+ * @return this wrapper for chaining
  */
 fun <T> T.addSelect(vararg fields: Renderable): T where T : AbstractWrapper<*, *, T>, T : Query<*, *, *> {
     if (fields.isEmpty()) return this
@@ -78,12 +91,35 @@ fun <T> T.addSelect(vararg fields: Renderable): T where T : AbstractWrapper<*, *
     return this
 }
 
+/**
+ * Adds a condition to the WHERE clause using AND logic.
+ *
+ * The condition is wrapped in a nested segment to preserve precedence.
+ *
+ * @param condition the condition to add
+ * @return this wrapper for chaining
+ */
 fun <T : AbstractWrapper<*, *, T>> T.addCondition(condition: Condition): T = nested { it.apply(condition.render(WrapperRender(it))) }
 
+/**
+ * Alias for [addCondition] - adds a condition using AND logic.
+ */
 fun <T : AbstractWrapper<*, *, T>> T.and(condition: Condition): T = this.addCondition(condition)
 
+/**
+ * Adds a condition to the WHERE clause using OR logic.
+ *
+ * @param condition the condition to add
+ * @return this wrapper for chaining
+ */
 fun <T : AbstractWrapper<*, *, T>> T.or(condition: Condition): T = this.or().addCondition(condition)
 
+/**
+ * Clears all conditions from the WHERE clause.
+ *
+ * @param condition if true, clears conditions; otherwise, no-op
+ * @return this wrapper for chaining
+ */
 fun <T : AbstractWrapper<*, *, T>> T.clearCondition(condition: Boolean = true): T {
     if (condition) {
         // Trigger an update for [MergeSegments]'s cacheSqlSegment

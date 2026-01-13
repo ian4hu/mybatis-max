@@ -22,8 +22,13 @@ import com.github.ian4hu.mybatis.max.Render
 import com.github.ian4hu.mybatis.max.conditions.DummyCondition
 
 /**
- * @author ian
- * @date 2026/01/13
+ * Binary expression combining multiple operands with a single operator.
+ *
+ * Automatically flattens nested expressions with the same operator and removes duplicates.
+ * Composite sub-expressions are wrapped in parentheses to preserve precedence.
+ *
+ * @property op the binary operator (AND, OR, XOR, etc.)
+ * @property elements the operand expressions
  */
 data class BiExpr(val op: BiOp, val elements: List<Expr>) :
     Condition,
@@ -38,8 +43,16 @@ data class BiExpr(val op: BiOp, val elements: List<Expr>) :
 
     companion object {
         /**
-         * Creates an OR expression, flattening nested ORs and removing duplicates.
-         * Returns a single expression if only one element remains after optimization.
+         * Creates a binary expression with automatic optimization.
+         *
+         * Flattens nested expressions using the same operator and removes duplicates.
+         * If only one element remains after optimization, returns it directly.
+         *
+         * @param op the binary operator
+         * @param a the first operand
+         * @param b the second operand
+         * @param expr additional operands
+         * @return optimized condition expression
          */
         fun of(op: BiOp, a: Expr, b: Expr, vararg expr: Expr): Condition {
             val elements = arrayOf(a, b, *expr)

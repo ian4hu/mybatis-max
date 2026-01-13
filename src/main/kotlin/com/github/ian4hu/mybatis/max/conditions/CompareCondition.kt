@@ -21,8 +21,13 @@ import com.github.ian4hu.mybatis.max.Expr
 import com.github.ian4hu.mybatis.max.Render
 
 /**
- * @author ian
- * @date 2026/01/13
+ * Binary comparison condition.
+ *
+ * Renders as: `left operator right` (e.g., `age >= 18`).
+ *
+ * @property op the comparison operator
+ * @property left the left operand
+ * @property right the right operand
  */
 data class CompareCondition(val op: CompareOp, val left: Expr, val right: Expr) : Condition {
     override fun render(render: Render): String = arrayOf(left, right)

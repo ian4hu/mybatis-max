@@ -18,8 +18,11 @@ package com.github.ian4hu.mybatis.max
 import com.github.ian4hu.mybatis.max.conditions.CompareCondition
 
 /**
- * @author ian
- * @date 2026/01/13
+ * SQL comparison operators for building conditional expressions.
+ *
+ * Each operator corresponds to a standard SQL comparison operator.
+ *
+ * @property operator the SQL operator symbol
  */
 enum class CompareOp(val operator: String) {
     EqualTo("="),
@@ -31,5 +34,6 @@ enum class CompareOp(val operator: String) {
     LessThan("<"),
     ;
 
+    /** Creates a comparison condition with this operator. */
     fun of(a: Expr, b: Expr): Condition = CompareCondition(this, a, b)
 }

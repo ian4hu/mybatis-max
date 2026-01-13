@@ -22,12 +22,14 @@ import com.github.ian4hu.mybatis.max.SingularBooleanOp
 import com.github.ian4hu.mybatis.max.conditions.DummyCondition
 
 /**
- * Logical NOT expression that negates another expression.
+ * Unary boolean expression applying a single operator to an operand.
  *
- * Composite expressions are wrapped in parentheses.
- * Double negation is automatically eliminated.
+ * Supports logical NOT and SQL-specific predicates (IS NULL, IS TRUE, etc.).
+ * Composite operands are wrapped in parentheses to preserve precedence.
+ * Double negation is automatically eliminated via [inverseOp].
  *
- * @property expr the expression to negate
+ * @property op the unary operator
+ * @property expr the operand expression
  */
 @ConsistentCopyVisibility
 data class SinglularBooleanExpr private constructor(
@@ -46,6 +48,15 @@ data class SinglularBooleanExpr private constructor(
     override fun not(): Condition = op.inverseOp.let { SingularBooleanOp.valueOf(it) }.of(expr)
 
     companion object {
+        /**
+         * Creates a unary boolean expression.
+         *
+         * If operator is DUMMY (no-op), returns the expression directly as a condition.
+         *
+         * @param op the unary operator
+         * @param expr the operand expression
+         * @return condition with the operator applied
+         */
         fun of(op: SingularBooleanOp, expr: Expr): Condition {
             if (op == SingularBooleanOp.DUMMY) return DummyCondition.of(expr)
             return SinglularBooleanExpr(op, expr)

@@ -18,8 +18,11 @@ package com.github.ian4hu.mybatis.max
 import com.github.ian4hu.mybatis.max.expr.BiExpr
 
 /**
- * @author ian
- * @date 2026/01/13
+ * Binary operators for combining expressions.
+ *
+ * Includes logical operators (AND, OR, XOR) and bitwise operators (&, |, ^).
+ *
+ * @property op the SQL operator keyword or symbol
  */
 enum class BiOp(val op: String) {
     AND("AND"),
@@ -30,5 +33,6 @@ enum class BiOp(val op: String) {
     BIT_XOR("^"),
     ;
 
+    /** Creates a binary expression with this operator, flattening nested same-operator expressions. */
     fun of(a: Expr, b: Expr, vararg expr: Expr): Condition = BiExpr.of(this, a, b, *expr)
 }

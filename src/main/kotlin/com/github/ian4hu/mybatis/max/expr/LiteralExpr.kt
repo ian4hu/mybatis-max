@@ -40,6 +40,12 @@ data class LiteralExpr(
 
     companion object {
 
+        /**
+         * Maps quote characters to their corresponding content validation patterns.
+         *
+         * Each pattern validates characters allowed inside quoted strings, excluding
+         * the quote character itself (handled separately via escape/double-quote logic).
+         */
         val QUOTE_CHARS_AND_LITERAL_PATTERN = mapOf(
             '"' to Regex("^[a-zA-Z0-9+-. :;+\\-*/<>,~!@#%^&()?$\\[\\]`']*$"),
             '\'' to Regex("^[a-zA-Z0-9+-. :;+\\-*/<>,~!@#%^&()?$\\[\\]`\"]*$"),
@@ -47,24 +53,24 @@ data class LiteralExpr(
         )
 
         /**
-         * Pattern for validating safe SQL identifier literals.
+         * Pattern for validating simple SQL identifier literals.
          *
          * Matches: alphanumeric strings starting with a letter or underscore.
          *
-         * Valid: `user_name`, `COUNT`, `table1`, `_temp.col`, `NULL`
+         * Valid: `user_name`, `COUNT`, `table1`, `_temp`, `NULL`
          *
-         * Invalid: `user-name`, `1user`, `user name`, `user;DROP`
+         * Invalid: `user-name`, `1user`, `user name`, `user;DROP`, `user.col`
          */
         val IDENTIFIER_PATTERN = Regex("^[_A-Za-z][_A-Za-z0-9]*$")
 
         /**
-         * Pattern for validating safe SQL identifier literals.
+         * Pattern for validating SQL column references including qualified names.
          *
-         * Matches: alphanumeric strings starting with a letter or underscore.
+         * Matches: identifiers with optional dot-separated qualifiers (table.column).
          *
-         * Valid: `user_name`, `COUNT`, `table1`, `_temp.col`, `NULL`
+         * Valid: `user_name`, `COUNT`, `table1`, `t.col`, `schema.table.col`, `NULL`
          *
-         * Invalid: `user-name`, `1user`, `user name`, `user;DROP`
+         * Invalid: `user-name`, `1user`, `user name`, `user;DROP`, `.col`, `table.`
          */
         val COLUMN_REGEX = Regex("^[_A-Za-z][_A-Za-z0-9]*(\\.?[_A-Za-z0-9]+)*$")
 
@@ -80,13 +86,23 @@ data class LiteralExpr(
         /**
          * Checks if the value is a safe SQL literal.
          *
-         * Safe literals: SQL identifiers or numeric values.
+         * Safe literals include:
+         * - SQL identifiers (qualified columns, table names)
+         * - Numeric values
+         * - Simple quoted strings (with proper escaping)
          */
         fun isSafeLiteral(value: String): Boolean = value.matches(COLUMN_REGEX) ||
             value.matches(NUMERIC_REGEX) || isSimpleQuotedLiteral(value)
 
         /**
-         * Simple quoted string literal, like: ''(empty string), '123', '$.json.path[0]', 'hello world', "hello world"
+         * Validates simple quoted string literals.
+         *
+         * Accepts strings enclosed in matching quotes (', ", `) with safe content.
+         * Supports escaped quotes (`\'`) and doubled quotes (`''`).
+         *
+         * Valid: `''` (empty), `'123'`, `'$.json.path[0]'`, `'hello world'`, `"name"`
+         *
+         * Invalid: `'unclosed`, `'a'b'` (unescaped quote), `'DROP TABLE;'` (semicolon)
          */
         fun isSimpleQuotedLiteral(value: String): Boolean {
             if (value.isEmpty() || value.length < 2) return false
@@ -105,6 +121,9 @@ data class LiteralExpr(
             return withoutDoubleQuote.matches(literalPattern)
         }
 
+        /**
+         * Validates SQL function names using column reference pattern.
+         */
         fun isValidFunctionName(name: String): Boolean = name.matches(COLUMN_REGEX)
     }
 }
