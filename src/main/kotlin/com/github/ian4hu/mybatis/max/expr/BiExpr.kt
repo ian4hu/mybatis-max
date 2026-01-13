@@ -33,7 +33,7 @@ import com.github.ian4hu.mybatis.max.conditions.DummyCondition
 data class BiExpr(val op: BinaryOp, val elements: List<Expr>) :
     Condition,
     CompositeExpr {
-    override fun render(render: Render): String = elements.joinToString(" ${op.name} ") {
+    override fun render(render: Render): String = elements.joinToString(" ${op.op} ") {
         if (it is CompositeExpr) {
             "(${it.render(render)})"
         } else {
