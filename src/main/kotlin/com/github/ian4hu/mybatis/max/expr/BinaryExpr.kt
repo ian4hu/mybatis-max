@@ -30,7 +30,7 @@ import com.github.ian4hu.mybatis.max.conditions.DummyCondition
  * @property op the binary operator (AND, OR, XOR, etc.)
  * @property elements the operand expressions
  */
-data class BiExpr(val op: BinaryOp, val elements: List<Expr>) :
+data class BinaryExpr(val op: BinaryOp, val elements: List<Expr>) :
     Condition,
     CompositeExpr {
     override fun render(render: Render): String = elements.joinToString(" ${op.op} ") {
@@ -56,11 +56,11 @@ data class BiExpr(val op: BinaryOp, val elements: List<Expr>) :
          */
         fun of(op: BinaryOp, a: Expr, b: Expr, vararg expr: Expr): Condition {
             val elements = arrayOf(a, b, *expr)
-                .flatMap { if (it is BiExpr && it.op == op) it.elements else listOf(it) }.distinct()
+                .flatMap { if (it is BinaryExpr && it.op == op) it.elements else listOf(it) }.distinct()
             if (elements.size == 1) {
                 return DummyCondition.of(elements[0])
             }
-            return BiExpr(op, elements)
+            return BinaryExpr(op, elements)
         }
     }
 }

@@ -15,7 +15,7 @@
  */
 package com.github.ian4hu.mybatis.max
 
-import com.github.ian4hu.mybatis.max.expr.BiExpr
+import com.github.ian4hu.mybatis.max.expr.BinaryExpr
 
 /**
  * Binary operators for combining expressions.
@@ -36,5 +36,5 @@ enum class BinaryOp(val op: String) {
     ;
 
     /** Creates a binary expression with this operator, flattening nested same-operator expressions. */
-    fun of(a: Expr, b: Expr, vararg expr: Expr): Condition = BiExpr.of(this, a, b, *expr)
+    fun of(a: Expr, b: Expr, vararg expr: Expr): Condition = BinaryExpr.of(this, a, b, *expr)
 }
