@@ -18,7 +18,7 @@ package com.github.ian4hu.mybatis.max.expr
 import com.github.ian4hu.mybatis.max.Condition
 import com.github.ian4hu.mybatis.max.Expr
 import com.github.ian4hu.mybatis.max.Render
-import com.github.ian4hu.mybatis.max.SingularBooleanOp
+import com.github.ian4hu.mybatis.max.UnaryBooleanOp
 import com.github.ian4hu.mybatis.max.conditions.DummyCondition
 
 /**
@@ -32,8 +32,8 @@ import com.github.ian4hu.mybatis.max.conditions.DummyCondition
  * @property expr the operand expression
  */
 @ConsistentCopyVisibility
-data class SinglularBooleanExpr private constructor(
-    val op: SingularBooleanOp,
+data class UnaryBooleanExpr private constructor(
+    val op: UnaryBooleanOp,
     val expr: Expr,
 ) : Condition {
     override fun render(render: Render): String {
@@ -45,7 +45,7 @@ data class SinglularBooleanExpr private constructor(
         return if (op.prefix) "${op.op} $renderedExpr" else "$renderedExpr ${op.op}"
     }
 
-    override fun not(): Condition = op.inverseOp.let { SingularBooleanOp.valueOf(it) }.of(expr)
+    override fun not(): Condition = op.inverseOp.let { UnaryBooleanOp.valueOf(it) }.of(expr)
 
     companion object {
         /**
@@ -57,9 +57,9 @@ data class SinglularBooleanExpr private constructor(
          * @param expr the operand expression
          * @return condition with the operator applied
          */
-        fun of(op: SingularBooleanOp, expr: Expr): Condition {
-            if (op == SingularBooleanOp.DUMMY) return DummyCondition.of(expr)
-            return SinglularBooleanExpr(op, expr)
+        fun of(op: UnaryBooleanOp, expr: Expr): Condition {
+            if (op == UnaryBooleanOp.DUMMY) return DummyCondition.of(expr)
+            return UnaryBooleanExpr(op, expr)
         }
     }
 }

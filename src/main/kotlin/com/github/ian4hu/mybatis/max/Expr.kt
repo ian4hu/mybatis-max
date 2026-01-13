@@ -189,9 +189,9 @@ interface Expr : Renderable {
      * @param expr additional expressions
      * @return AND expression, or single expression if optimized to one
      */
-    fun and(b: Expr, vararg expr: Expr): Condition = BiOp.AND.of(this, b, *expr)
+    fun and(b: Expr, vararg expr: Expr): Condition = BinaryOp.AND.of(this, b, *expr)
 
-    fun xor(b: Expr, vararg expr: Expr): Condition = BiOp.XOR.of(this, b, *expr)
+    fun xor(b: Expr, vararg expr: Expr): Condition = BinaryOp.XOR.of(this, b, *expr)
 
     /**
      * Combines this expression with others using OR.
@@ -202,7 +202,7 @@ interface Expr : Renderable {
      * @param expr additional expressions
      * @return OR expression, or single expression if optimized to one
      */
-    fun or(b: Expr, vararg expr: Expr): Condition = BiOp.OR.of(this, b, *expr)
+    fun or(b: Expr, vararg expr: Expr): Condition = BinaryOp.OR.of(this, b, *expr)
 
     /**
      * Negates this expression using NOT.
@@ -211,16 +211,16 @@ interface Expr : Renderable {
      *
      * @return NOT expression, or original expression if already negated
      */
-    fun not(): Condition = SingularBooleanOp.NOT.of(this)
+    fun not(): Condition = UnaryBooleanOp.NOT.of(this)
 
     fun isNotNull(): Condition = isNull().not()
 
-    fun isNull(): Condition = SingularBooleanOp.IS_NULL.of(this)
+    fun isNull(): Condition = UnaryBooleanOp.IS_NULL.of(this)
 
     fun isBool(bool: Boolean?): Condition = when (bool) {
-        null -> SingularBooleanOp.IS_UNKNOWN.of(this)
-        true -> SingularBooleanOp.IS_TRUE.of(this)
-        else -> SingularBooleanOp.IS_FLASE.of(this)
+        null -> UnaryBooleanOp.IS_UNKNOWN.of(this)
+        true -> UnaryBooleanOp.IS_TRUE.of(this)
+        else -> UnaryBooleanOp.IS_FLASE.of(this)
     }
 
     fun isNotBool(bool: Boolean?): Condition = isBool(bool).not()

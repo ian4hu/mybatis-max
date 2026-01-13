@@ -15,8 +15,7 @@
  */
 package com.github.ian4hu.mybatis.max
 
-import com.github.ian4hu.mybatis.max.conditions.DummyCondition
-import com.github.ian4hu.mybatis.max.expr.SinglularBooleanExpr
+import com.github.ian4hu.mybatis.max.expr.UnaryBooleanExpr
 
 /**
  * Unary boolean operators for SQL expressions.
@@ -27,7 +26,7 @@ import com.github.ian4hu.mybatis.max.expr.SinglularBooleanExpr
  * @property inverseOp the inverse operator (NOT negates to DUMMY, IS NULL to IS NOT NULL, etc.)
  * @property prefix if true, operator appears before operand; otherwise after
  */
-enum class SingularBooleanOp(val op: String, val inverseOp: String, val prefix: Boolean = false) {
+enum class UnaryBooleanOp(val op: String, val inverseOp: String, val prefix: Boolean = false) {
     DUMMY("", "NOT", true),
     NOT("NOT", "DUMMY", true),
     IS_NULL("IS NULL", "IS_NOT_NULL"),
@@ -41,5 +40,5 @@ enum class SingularBooleanOp(val op: String, val inverseOp: String, val prefix: 
     ;
 
     /** Creates a unary expression with this operator. */
-    fun of(expr: Expr): Condition = SinglularBooleanExpr.of(this, expr)
+    fun of(expr: Expr): Condition = UnaryBooleanExpr.of(this, expr)
 }

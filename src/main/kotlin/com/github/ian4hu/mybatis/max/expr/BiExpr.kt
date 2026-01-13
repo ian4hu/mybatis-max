@@ -15,7 +15,7 @@
  */
 package com.github.ian4hu.mybatis.max.expr
 
-import com.github.ian4hu.mybatis.max.BiOp
+import com.github.ian4hu.mybatis.max.BinaryOp
 import com.github.ian4hu.mybatis.max.Condition
 import com.github.ian4hu.mybatis.max.Expr
 import com.github.ian4hu.mybatis.max.Render
@@ -30,7 +30,7 @@ import com.github.ian4hu.mybatis.max.conditions.DummyCondition
  * @property op the binary operator (AND, OR, XOR, etc.)
  * @property elements the operand expressions
  */
-data class BiExpr(val op: BiOp, val elements: List<Expr>) :
+data class BiExpr(val op: BinaryOp, val elements: List<Expr>) :
     Condition,
     CompositeExpr {
     override fun render(render: Render): String = elements.joinToString(" ${op.name} ") {
@@ -54,7 +54,7 @@ data class BiExpr(val op: BiOp, val elements: List<Expr>) :
          * @param expr additional operands
          * @return optimized condition expression
          */
-        fun of(op: BiOp, a: Expr, b: Expr, vararg expr: Expr): Condition {
+        fun of(op: BinaryOp, a: Expr, b: Expr, vararg expr: Expr): Condition {
             val elements = arrayOf(a, b, *expr)
                 .flatMap { if (it is BiExpr && it.op == op) it.elements else listOf(it) }.distinct()
             if (elements.size == 1) {

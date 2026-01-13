@@ -24,22 +24,22 @@ package com.github.ian4hu.mybatis.max
 interface Condition : Expr
 
 /** Creates an equality condition: `a = b` */
-fun Expr.eq(b: Expr): Condition = CompareOp.EqualTo.of(this, b)
+fun Expr.eq(b: Expr): Condition = ComparisonOp.EqualTo.of(this, b)
 
 /** Creates an inequality condition: `a <> b` */
-fun Expr.ne(b: Expr): Condition = CompareOp.NotEqualTo.of(this, b)
+fun Expr.ne(b: Expr): Condition = ComparisonOp.NotEqualTo.of(this, b)
 
 /** Creates a greater-or-equal condition: `a >= b` */
-fun Expr.ge(b: Expr): Condition = CompareOp.GreaterOrEqualTo.of(this, b)
+fun Expr.ge(b: Expr): Condition = ComparisonOp.GreaterOrEqualTo.of(this, b)
 
 /** Creates a greater-than condition: `a > b` */
-fun Expr.gt(b: Expr): Condition = CompareOp.GreaterThan.of(this, b)
+fun Expr.gt(b: Expr): Condition = ComparisonOp.GreaterThan.of(this, b)
 
 /** Creates a less-or-equal condition: `a <= b` */
-fun Expr.le(b: Expr): Condition = CompareOp.LessOrEqualTo.of(this, b)
+fun Expr.le(b: Expr): Condition = ComparisonOp.LessOrEqualTo.of(this, b)
 
 /** Creates a less-than condition: `a < b` */
-fun Expr.lt(b: Expr): Condition = CompareOp.LessThan.of(this, b)
+fun Expr.lt(b: Expr): Condition = ComparisonOp.LessThan.of(this, b)
 
 /** Creates a null-safe equality condition: `a <=> b` (returns true if both null) */
-fun Expr.eqNullSafe(b: Expr): Condition = CompareOp.NullSafeEqualTo.of(this, b)
+fun Expr.eqNullSafe(b: Expr): Condition = ComparisonOp.NullSafeEqualTo.of(this, b)

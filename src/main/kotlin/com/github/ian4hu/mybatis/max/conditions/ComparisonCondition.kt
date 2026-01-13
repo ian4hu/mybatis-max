@@ -13,26 +13,23 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package com.github.ian4hu.mybatis.max
+package com.github.ian4hu.mybatis.max.conditions
 
-import com.github.ian4hu.mybatis.max.expr.BiExpr
+import com.github.ian4hu.mybatis.max.ComparisonOp
+import com.github.ian4hu.mybatis.max.Condition
+import com.github.ian4hu.mybatis.max.Expr
+import com.github.ian4hu.mybatis.max.Render
 
 /**
- * Binary operators for combining expressions.
+ * Binary comparison condition.
  *
- * Includes logical operators (AND, OR, XOR) and bitwise operators (&, |, ^).
+ * Renders as: `left operator right` (e.g., `age >= 18`).
  *
- * @property op the SQL operator keyword or symbol
+ * @property op the comparison operator
+ * @property left the left operand
+ * @property right the right operand
  */
-enum class BiOp(val op: String) {
-    AND("AND"),
-    OR("OR"),
-    XOR("XOR"),
-    BIT_AND("&"),
-    BIT_OR("|"),
-    BIT_XOR("^"),
-    ;
-
-    /** Creates a binary expression with this operator, flattening nested same-operator expressions. */
-    fun of(a: Expr, b: Expr, vararg expr: Expr): Condition = BiExpr.of(this, a, b, *expr)
+data class ComparisonCondition(val op: ComparisonOp, val left: Expr, val right: Expr) : Condition {
+    override fun render(render: Render): String = arrayOf(left, right)
+        .joinToString(op.op) { it.render(render) }
 }
