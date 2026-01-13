@@ -17,8 +17,16 @@ package com.github.ian4hu.mybatis.max.render
 
 import com.baomidou.mybatisplus.core.conditions.AbstractWrapper
 import com.baomidou.mybatisplus.core.conditions.Helper
+import com.baomidou.mybatisplus.core.conditions.query.Query
+import com.baomidou.mybatisplus.core.enums.SqlKeyword
+import com.baomidou.mybatisplus.core.enums.WrapperKeyword
+import com.baomidou.mybatisplus.core.toolkit.StringPool
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction
+import com.github.ian4hu.mybatis.max.Condition
+import com.github.ian4hu.mybatis.max.Expr
 import com.github.ian4hu.mybatis.max.Render
+import com.github.ian4hu.mybatis.max.Renderable
+import kotlin.math.exp
 import kotlin.reflect.KProperty1
 
 /**
@@ -37,4 +45,50 @@ class WrapperRender(val wrapper: AbstractWrapper<*, *, *>) : Render {
     override fun <T> kotlinProperty(property: KProperty1<T, *>, entityClass: Class<T>): String = Helper.wrapProperty(wrapper, property, entityClass)
 
     override fun formatParam(param: Any?, mapping: String?): String = Helper.wrapParam(wrapper, param, mapping)
+}
+
+/**
+ * Add select clause by condition
+ */
+fun <T> T.addSelect(vararg fields: Pair<Renderable, Boolean>): T where T : AbstractWrapper<*, *, T>, T : Query<*, *, *> = this.addSelect(*fields.filter { it.second }.map { it.first }.toTypedArray())
+
+/**
+ * Clear current select clause
+ */
+fun <T> T.clearSelect(condition: Boolean = true): T where T : AbstractWrapper<*, *, T>, T : Query<*, *, *> {
+    if (condition) {
+        Helper.getSqlSelect(this).stringValue = null
+    }
+    return this
+}
+
+/**
+ * Add select fields by [Renderable]
+ */
+fun <T> T.addSelect(vararg fields: Renderable): T where T : AbstractWrapper<*, *, T>, T : Query<*, *, *> {
+    if (fields.isEmpty()) return this
+    val render = WrapperRender(this)
+    val selectClause = Helper.getSqlSelect(this)
+    val rendered = fields
+        .map { it.render(render) }
+    val snippet = listOf(selectClause.stringValue).plus(rendered)
+        .filter { !it.isNullOrBlank() }
+        .joinToString(StringPool.COMMA)
+    selectClause.stringValue = snippet
+    return this
+}
+
+fun <T : AbstractWrapper<*, *, T>> T.addCondition(condition: Condition): T = nested { it.apply(condition.render(WrapperRender(it))) }
+
+fun <T : AbstractWrapper<*, *, T>> T.and(condition: Condition): T = this.addCondition(condition)
+
+fun <T : AbstractWrapper<*, *, T>> T.or(condition: Condition): T = this.or().addCondition(condition)
+
+fun <T : AbstractWrapper<*, *, T>> T.clearCondition(condition: Boolean = true): T {
+    if (condition) {
+        // Trigger an update for [MergeSegments]'s cacheSqlSegment
+        addCondition(Expr.and(Expr.literal("TRUE"), Expr.literal("TRUE")))
+        expression.normal.clear()
+    }
+    return this
 }

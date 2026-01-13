@@ -39,16 +39,34 @@ data class LiteralExpr(
     override fun render(render: Render): String = value
 
     companion object {
+
+        val QUOTE_CHARS_AND_LITERAL_PATTERN = mapOf(
+            '"' to Regex("^[a-zA-Z0-9+-. :;+\\-*/<>,~!@#%^&()?$\\[\\]`']*$"),
+            '\'' to Regex("^[a-zA-Z0-9+-. :;+\\-*/<>,~!@#%^&()?$\\[\\]`\"]*$"),
+            '`' to Regex("^[a-zA-Z0-9+-. :;+\\-*/<>,~!@#%^&()?$\\[\\]'\"]*$"),
+        )
+
         /**
          * Pattern for validating safe SQL identifier literals.
          *
          * Matches: alphanumeric strings starting with a letter or underscore.
          *
-         * Valid: `user_name`, `COUNT`, `table1`, `_temp`, `NULL`
+         * Valid: `user_name`, `COUNT`, `table1`, `_temp.col`, `NULL`
          *
          * Invalid: `user-name`, `1user`, `user name`, `user;DROP`
          */
-        val IDENTIFIER_REGEX = Regex("(?i)^[_A-Z][_A-Z0-9]*$")
+        val IDENTIFIER_PATTERN = Regex("^[_A-Za-z][_A-Za-z0-9]*$")
+
+        /**
+         * Pattern for validating safe SQL identifier literals.
+         *
+         * Matches: alphanumeric strings starting with a letter or underscore.
+         *
+         * Valid: `user_name`, `COUNT`, `table1`, `_temp.col`, `NULL`
+         *
+         * Invalid: `user-name`, `1user`, `user name`, `user;DROP`
+         */
+        val COLUMN_REGEX = Regex("^[_A-Za-z][_A-Za-z0-9]*(\\.?[_A-Za-z0-9]+)*$")
 
         /**
          * Pattern for validating safe SQL numeric literals.
@@ -64,7 +82,29 @@ data class LiteralExpr(
          *
          * Safe literals: SQL identifiers or numeric values.
          */
-        fun isSafeLiteral(value: String): Boolean = value.matches(IDENTIFIER_REGEX) ||
-            value.matches(NUMERIC_REGEX)
+        fun isSafeLiteral(value: String): Boolean = value.matches(COLUMN_REGEX) ||
+            value.matches(NUMERIC_REGEX) || isSimpleQuotedLiteral(value)
+
+        /**
+         * Simple quoted string literal, like: ''(empty string), '123', '$.json.path[0]', 'hello world', "hello world"
+         */
+        fun isSimpleQuotedLiteral(value: String): Boolean {
+            if (value.isEmpty() || value.length < 2) return false
+            val firstChar = value[0]
+            val lastChar = value.last()
+            if (firstChar != lastChar) {
+                return false
+            }
+            // Quote char allow list check
+            val literalPattern = QUOTE_CHARS_AND_LITERAL_PATTERN[firstChar] ?: return false
+
+            // Allow double quote char
+            val withoutDoubleQuote = value.drop(1).dropLast(1)
+                .replace("\\$firstChar", "") // strip escaped quote
+                .replace("$firstChar$firstChar", "") // strip double quote
+            return withoutDoubleQuote.matches(literalPattern)
+        }
+
+        fun isValidFunctionName(name: String): Boolean = name.matches(COLUMN_REGEX)
     }
 }

@@ -15,22 +15,20 @@
  */
 package com.github.ian4hu.mybatis.max.expr
 
+import com.github.ian4hu.mybatis.max.BiOp
+import com.github.ian4hu.mybatis.max.Condition
 import com.github.ian4hu.mybatis.max.Expr
 import com.github.ian4hu.mybatis.max.Render
+import com.github.ian4hu.mybatis.max.conditions.DummyCondition
 
 /**
- * Logical AND expression that combines multiple expressions.
- *
- * Automatically flattens nested AND expressions and removes duplicates.
- * Non-AND composite expressions are wrapped in parentheses.
- *
- * @property elements the list of expressions to combine
+ * @author ian
+ * @date 2026/01/13
  */
-@ConsistentCopyVisibility
-data class AndExpr private constructor(
-    val elements: List<Expr>,
-) : CompositeExpr {
-    override fun render(render: Render): String = elements.joinToString(" AND ") {
+data class BiExpr(val op: BiOp, val elements: List<Expr>) :
+    Condition,
+    CompositeExpr {
+    override fun render(render: Render): String = elements.joinToString(" ${op.name} ") {
         if (it is CompositeExpr) {
             "(${it.render(render)})"
         } else {
@@ -40,16 +38,16 @@ data class AndExpr private constructor(
 
     companion object {
         /**
-         * Creates an AND expression, flattening nested ANDs and removing duplicates.
+         * Creates an OR expression, flattening nested ORs and removing duplicates.
          * Returns a single expression if only one element remains after optimization.
          */
-        fun of(a: Expr, b: Expr, vararg expr: Expr): Expr {
+        fun of(op: BiOp, a: Expr, b: Expr, vararg expr: Expr): Condition {
             val elements = arrayOf(a, b, *expr)
-                .flatMap { if (it is AndExpr) it.elements else listOf(it) }.distinct()
+                .flatMap { if (it is BiExpr && it.op == op) it.elements else listOf(it) }.distinct()
             if (elements.size == 1) {
-                return elements[0]
+                return DummyCondition.of(elements[0])
             }
-            return AndExpr(elements)
+            return BiExpr(op, elements)
         }
     }
 }

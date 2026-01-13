@@ -15,8 +15,11 @@
  */
 package com.github.ian4hu.mybatis.max.expr
 
+import com.github.ian4hu.mybatis.max.Condition
 import com.github.ian4hu.mybatis.max.Expr
 import com.github.ian4hu.mybatis.max.Render
+import com.github.ian4hu.mybatis.max.SingularBooleanOp
+import com.github.ian4hu.mybatis.max.conditions.DummyCondition
 
 /**
  * Logical NOT expression that negates another expression.
@@ -27,19 +30,25 @@ import com.github.ian4hu.mybatis.max.Render
  * @property expr the expression to negate
  */
 @ConsistentCopyVisibility
-data class NotExpr private constructor(
+data class SinglularBooleanExpr private constructor(
+    val op: SingularBooleanOp,
     val expr: Expr,
-) : CompositeExpr {
-    override fun render(render: Render): String = if (expr is CompositeExpr) {
-        "NOT (${expr.render(render)})"
-    } else {
-        "NOT ${expr.render(
-            render,
-        )}"
+) : Condition {
+    override fun render(render: Render): String {
+        val renderedExpr = if (expr is CompositeExpr) {
+            "(${expr.render(render)})"
+        } else {
+            expr.render(render)
+        }
+        return if (op.prefix) "${op.op} $renderedExpr" else "$renderedExpr ${op.op}"
     }
 
+    override fun not(): Condition = op.inverseOp.let { SingularBooleanOp.valueOf(it) }.of(expr)
+
     companion object {
-        /** Creates a NOT expression, eliminating double negation if present. */
-        fun of(expr: Expr): Expr = if (expr is NotExpr) expr.expr else NotExpr(expr)
+        fun of(op: SingularBooleanOp, expr: Expr): Condition {
+            if (op == SingularBooleanOp.DUMMY) return DummyCondition.of(expr)
+            return SinglularBooleanExpr(op, expr)
+        }
     }
 }

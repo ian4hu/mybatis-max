@@ -67,14 +67,13 @@ public class JavaExprTest implements MybatisBootstrap {
 		String num = Expr.constant("1.23E10").render(render);
 		assertEquals("1.23E10", num);
 
-		String notSafeStr = Expr.constant("'hello world'").render(render);
-		assertEquals("#{ew.paramNameValuePairs.MPGENVAL2}", notSafeStr);
-		assertEquals("'hello world'", wrapper.getParamNameValuePairs().get("MPGENVAL2"));
+		String safeLiteralString = Expr.constant("'hello world'").render(render);
+		assertEquals("'hello world'", safeLiteralString);
 
 		Pair<String, String> param = new Pair<>("A", "B");
 		String objParam = Expr.constant(param).render(render);
-		assertEquals("#{ew.paramNameValuePairs.MPGENVAL3}", objParam);
-		assertEquals(param, wrapper.getParamNameValuePairs().get("MPGENVAL3"));
+		assertEquals("#{ew.paramNameValuePairs.MPGENVAL2}", objParam);
+		assertEquals(param, wrapper.getParamNameValuePairs().get("MPGENVAL2"));
 	}
 
 	@Test

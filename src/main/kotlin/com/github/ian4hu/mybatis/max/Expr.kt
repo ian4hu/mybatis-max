@@ -16,15 +16,12 @@
 package com.github.ian4hu.mybatis.max
 
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction
-import com.github.ian4hu.mybatis.max.expr.AndExpr
 import com.github.ian4hu.mybatis.max.expr.ColumnExpr
 import com.github.ian4hu.mybatis.max.expr.ConstantExpr
 import com.github.ian4hu.mybatis.max.expr.FunctionCallExpr
 import com.github.ian4hu.mybatis.max.expr.KotlinPropertyExpr
 import com.github.ian4hu.mybatis.max.expr.LambdaExpr
 import com.github.ian4hu.mybatis.max.expr.LiteralExpr
-import com.github.ian4hu.mybatis.max.expr.NotExpr
-import com.github.ian4hu.mybatis.max.expr.OrExpr
 import com.github.ian4hu.mybatis.max.expr.VariableExpr
 import kotlin.reflect.KProperty1
 
@@ -156,7 +153,7 @@ interface Expr : Renderable {
             a: Expr,
             b: Expr,
             vararg others: Expr,
-        ): Expr = a.and(b, *others)
+        ): Condition = a.and(b, *others)
 
         /**
          * Combines multiple expressions using OR.
@@ -170,7 +167,7 @@ interface Expr : Renderable {
             a: Expr,
             b: Expr,
             vararg others: Expr,
-        ): Expr = a.or(b, *others)
+        ): Condition = a.or(b, *others)
 
         /**
          * Negates an expression using NOT.
@@ -178,7 +175,9 @@ interface Expr : Renderable {
          * @param a the expression to negate
          * @return NOT expression
          */
-        @JvmStatic fun not(a: Expr): Expr = a.not()
+        @JvmStatic fun not(a: Expr): Condition = a.not()
+
+        @JvmStatic fun xor(a: Expr, b: Expr, vararg others: Expr): Condition = a.xor(b, *others)
     }
 
     /**
@@ -190,7 +189,9 @@ interface Expr : Renderable {
      * @param expr additional expressions
      * @return AND expression, or single expression if optimized to one
      */
-    fun and(b: Expr, vararg expr: Expr): Expr = AndExpr.of(this, b, *expr)
+    fun and(b: Expr, vararg expr: Expr): Condition = BiOp.AND.of(this, b, *expr)
+
+    fun xor(b: Expr, vararg expr: Expr): Condition = BiOp.XOR.of(this, b, *expr)
 
     /**
      * Combines this expression with others using OR.
@@ -201,7 +202,7 @@ interface Expr : Renderable {
      * @param expr additional expressions
      * @return OR expression, or single expression if optimized to one
      */
-    fun or(b: Expr, vararg expr: Expr): Expr = OrExpr.of(this, b, *expr)
+    fun or(b: Expr, vararg expr: Expr): Condition = BiOp.OR.of(this, b, *expr)
 
     /**
      * Negates this expression using NOT.
@@ -210,5 +211,17 @@ interface Expr : Renderable {
      *
      * @return NOT expression, or original expression if already negated
      */
-    fun not(): Expr = NotExpr.of(this)
+    fun not(): Condition = SingularBooleanOp.NOT.of(this)
+
+    fun isNotNull(): Condition = isNull().not()
+
+    fun isNull(): Condition = SingularBooleanOp.IS_NULL.of(this)
+
+    fun isBool(bool: Boolean?): Condition = when (bool) {
+        null -> SingularBooleanOp.IS_UNKNOWN.of(this)
+        true -> SingularBooleanOp.IS_TRUE.of(this)
+        else -> SingularBooleanOp.IS_FLASE.of(this)
+    }
+
+    fun isNotBool(bool: Boolean?): Condition = isBool(bool).not()
 }

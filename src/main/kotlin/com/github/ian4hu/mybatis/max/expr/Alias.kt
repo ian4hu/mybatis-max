@@ -45,6 +45,6 @@ data class Alias(
 
     companion object {
         /** Checks if the value is a valid SQL identifier. */
-        fun isValidIdentifier(value: String): Boolean = value.matches(LiteralExpr.IDENTIFIER_REGEX)
+        fun isValidIdentifier(value: String): Boolean = value.matches(LiteralExpr.IDENTIFIER_PATTERN)
     }
 }

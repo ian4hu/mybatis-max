@@ -74,7 +74,7 @@ data class FunctionCallExpr(
     companion object {
         /** Validates that the function name is a valid SQL identifier. */
         fun checkFunctionCall(fn: FunctionCallExpr) {
-            if (!Alias.isValidIdentifier(fn.fn)) throw IllegalArgumentException("Invalid function name: '$fn'")
+            if (!LiteralExpr.isValidFunctionName(fn.fn)) throw IllegalArgumentException("Invalid function name: '$fn'")
         }
     }
 }

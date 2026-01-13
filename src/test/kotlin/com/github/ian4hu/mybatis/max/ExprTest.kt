@@ -27,10 +27,9 @@ import com.github.ian4hu.mybatis.max.Expr.Companion.lambda
 import com.github.ian4hu.mybatis.max.Expr.Companion.literal
 import com.github.ian4hu.mybatis.max.Expr.Companion.not
 import com.github.ian4hu.mybatis.max.Expr.Companion.or
+import com.github.ian4hu.mybatis.max.Expr.Companion.xor
 import com.github.ian4hu.mybatis.max.entity.BlockStorageDBO
-import com.github.ian4hu.mybatis.max.expr.AndExpr
 import com.github.ian4hu.mybatis.max.expr.ConstantExpr
-import com.github.ian4hu.mybatis.max.expr.OrExpr
 import com.github.ian4hu.mybatis.max.render.WrapperRender
 import org.apache.ibatis.type.BigIntegerTypeHandler
 import org.junit.jupiter.api.Assertions
@@ -97,7 +96,9 @@ class ExprTest : MybatisBootstrap {
         val exprStr = expr.render(WrapperRender(Wrappers.query<Any>()))
         Assertions.assertEquals("NOT (A AND B AND C AND (C OR D OR E OR (A AND B AND C)))", exprStr)
         val alias = expr.alias("expr")
-        Assertions.assertEquals("($exprStr) AS expr", alias.render(WrapperRender(Wrappers.query<Any>())))
+        Assertions.assertEquals("$exprStr AS expr", alias.render(WrapperRender(Wrappers.query<Any>())))
+
+        Assertions.assertEquals("(A AND B) AS alias", literal("A").and(literal("B")).alias("alias").render(WrapperRender(Wrappers.query<Any>())))
     }
 
     companion object {
@@ -141,28 +142,14 @@ class ExprTest : MybatisBootstrap {
                     and(and(literal("A"), literal("B")), and(literal("B"), literal("C"))),
                     "A AND B AND C",
                 ),
-                of(
-                    AndExpr.of(
-                        and(literal("A"), literal("B")),
-                        and(literal("B"), literal("C")),
-                    ),
-                    "A AND B AND C",
-                ),
                 of(or(or(literal("A"), literal("B")), or(literal("B"), literal("C"))), "A OR B OR C"),
-                of(
-                    OrExpr.of(
-                        or(literal("A"), literal("B")),
-                        or(literal("B"), literal("C")),
-                    ),
-                    "A OR B OR C",
-                ),
                 of(
                     and(or(literal("A"), literal("B")), or(literal("B"), literal("C"))),
                     "(A OR B) AND (B OR C)",
                 ),
                 of(
                     and(not(or(literal("A"), literal("B"))), or(literal("B"), literal("C"))),
-                    "(NOT (A OR B)) AND (B OR C)",
+                    "NOT (A OR B) AND (B OR C)",
                 ),
                 of(
                     or(and(literal("A"), literal("B")), and(literal("B"), literal("C"))),
@@ -170,7 +157,7 @@ class ExprTest : MybatisBootstrap {
                 ),
                 of(
                     or(not(and(literal("A"), literal("B"))), and(literal("B"), literal("C"))),
-                    "(NOT (A AND B)) OR (B AND C)",
+                    "NOT (A AND B) OR (B AND C)",
                 ),
                 of(lambda(JavaHelperTest.metadata()), "metadata"),
                 of(kotlinProperty(BlockStorageDBO::outBizId), "out_biz_id"),
@@ -180,6 +167,7 @@ class ExprTest : MybatisBootstrap {
                 of(column("id").alias("aid").alias(""), "id"),
                 of(constant(1.toShort()).alias("aid"), "1 AS aid"),
                 of(and(literal("+1"), literal("-1"), literal("TRUE"), literal("NULL")), "+1 AND -1 AND TRUE AND NULL"),
+                of(xor(literal("A"), literal("B")), "A XOR B"),
             ).flatMap { expr ->
                 wrappersProvider().map {
                     of(
@@ -219,6 +207,11 @@ class ExprTest : MybatisBootstrap {
         val literal = "current_timestamp"
         val result = literal(literal).render(WrapperRender(wrapper))
         assertEquals(literal, result)
+
+        assertEquals("''", literal("''").render(WrapperRender(wrapper)))
+        assertEquals("'hello world!'", literal("'hello world!'").render(WrapperRender(wrapper)))
+        assertEquals("'hello'' world!'", literal("'hello'' world!'").render(WrapperRender(wrapper)))
+        assertEquals("'a\\'\\'''b'", literal("'a\\'\\'''b'").render(WrapperRender(wrapper)))
     }
 
     @ParameterizedTest(name = "{0}")
@@ -229,6 +222,11 @@ class ExprTest : MybatisBootstrap {
     ) {
         assertFailsWith(IllegalArgumentException::class) {
             val literal = "A';DROP"
+            literal(literal).render(WrapperRender(wrapper))
+        }
+
+        assertFailsWith(IllegalArgumentException::class) {
+            val literal = ""
             literal(literal).render(WrapperRender(wrapper))
         }
     }
@@ -307,7 +305,7 @@ class ExprTest : MybatisBootstrap {
         }
     }
 
-    @ParameterizedTest(name = "{0} - {3}")
+    @ParameterizedTest(name = "[{index}]{0} - {3}")
     @MethodSource("exprTestSource")
     fun testVariousExpression(
         name: String,
@@ -317,5 +315,23 @@ class ExprTest : MybatisBootstrap {
     ) {
         val result = expr.render(WrapperRender(wrapper))
         assertEquals(expected, result)
+    }
+
+    @Test
+    fun testSingluarExpr() {
+        arrayOf(
+            literal("A").isNull() to "A IS NULL",
+            literal("A").isNotNull() to "A IS NOT NULL",
+            literal("B").isBool(true) to "B IS TRUE",
+            literal("B").isNotBool(true) to "B IS NOT TRUE",
+            literal("C").isBool(false) to "C IS FALSE",
+            literal("C").isNotBool(false) to "C IS NOT FALSE",
+            literal("D").isBool(null) to "D IS UNKNOWN",
+            literal("D").isNotBool(null) to "D IS NOT UNKNOWN",
+            literal("A").isNull().and(literal("X").and(literal("Y"))) to "A IS NULL AND X AND Y",
+            literal("A").isNotNull().and(literal("B").isNull()).and(literal("X").or(literal("Y"), literal("Z"))) to "A IS NOT NULL AND B IS NULL AND (X OR Y OR Z)",
+        ).forEach { (expr, str) ->
+            assertEquals(str, expr.render(WrapperRender(Wrappers.query<Any>())))
+        }
     }
 }
