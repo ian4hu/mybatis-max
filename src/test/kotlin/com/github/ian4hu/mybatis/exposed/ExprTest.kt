@@ -19,6 +19,7 @@ import com.baomidou.mybatisplus.core.conditions.AbstractWrapper
 import com.baomidou.mybatisplus.core.toolkit.Wrappers
 import com.baomidou.mybatisplus.extension.kotlin.KtQueryWrapper
 import com.github.ian4hu.mybatis.exposed.Condition.Companion.and
+import com.github.ian4hu.mybatis.exposed.Condition.Companion.literal
 import com.github.ian4hu.mybatis.exposed.Condition.Companion.not
 import com.github.ian4hu.mybatis.exposed.Condition.Companion.or
 import com.github.ian4hu.mybatis.exposed.Condition.Companion.xor
@@ -334,5 +335,3 @@ class ExprTest : MybatisBootstrap {
         }
     }
 }
-
-fun literal(name: String) = Expr.literal(name).asCondition()
