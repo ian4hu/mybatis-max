@@ -14,11 +14,15 @@ repositories {
 }
 
 dependencies {
-    //implementation("com.baomidou:mybatis-plus-boot-starter:3.5.15")
+    // implementation("com.baomidou:mybatis-plus-boot-starter:3.5.15")
     implementation("com.baomidou:mybatis-plus:3.5.15")
     implementation("org.springframework:spring-aop:5.3.39")
+    implementation("org.springframework:spring-jdbc:5.3.39")
+    implementation(kotlin("reflect"))
     testImplementation(kotlin("test"))
     testImplementation("org.junit.jupiter:junit-jupiter-params")
+    testImplementation("com.h2database:h2:2.4.240")
+    testImplementation("org.slf4j:slf4j-simple:2.0.7")
 }
 
 kotlin {

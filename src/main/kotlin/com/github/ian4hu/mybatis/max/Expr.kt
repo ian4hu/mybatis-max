@@ -199,6 +199,8 @@ interface Expr : Renderable {
      */
     fun and(b: Expr, vararg expr: Expr): Condition = BinaryOp.AND.of(this, b, *expr)
 
+    infix fun and(b: Expr) = BinaryOp.AND.of(this, b)
+
     /**
      * Combines this expression with others using XOR.
      *
@@ -218,6 +220,8 @@ interface Expr : Renderable {
      * @return OR expression, or single expression if optimized to one
      */
     fun or(b: Expr, vararg expr: Expr): Condition = BinaryOp.OR.of(this, b, *expr)
+
+    infix fun or(b: Expr) = BinaryOp.OR.of(this, b)
 
     /**
      * Negates this expression using NOT.

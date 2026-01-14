@@ -13,25 +13,9 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package com.github.ian4hu.mybatis.max.entity
+package com.github.ian4hu.mybatis.max.mapper
 
-import com.baomidou.mybatisplus.annotation.IdType
-import com.baomidou.mybatisplus.annotation.TableId
-import com.baomidou.mybatisplus.annotation.TableName
-import java.util.Date
+import com.baomidou.mybatisplus.core.mapper.BaseMapper
+import com.github.ian4hu.mybatis.max.entity.SampleDBO
 
-@TableName("block_storage")
-class BlockStorageDBO {
-    @TableId(type = IdType.AUTO)
-    var id: Long? = null
-    var gmtCreate: Date? = null
-
-    var gmtModified: Date? = null
-    var outBizId: String? = null
-    var type: String? = null
-    var mediaType: String? = null
-    var sha256: String? = null
-    var metadata: String? = null
-    var buffSize: Long? = null
-    var buffer: ByteArray? = null
-}
+interface SampleMapper : BaseMapper<SampleDBO>

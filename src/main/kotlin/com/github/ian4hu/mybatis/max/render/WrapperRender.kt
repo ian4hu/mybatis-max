@@ -26,6 +26,7 @@ import com.github.ian4hu.mybatis.max.Condition
 import com.github.ian4hu.mybatis.max.Expr
 import com.github.ian4hu.mybatis.max.Render
 import com.github.ian4hu.mybatis.max.Renderable
+import com.github.ian4hu.mybatis.max.expr.CompositeExpr
 import kotlin.reflect.KProperty1
 
 /**
@@ -98,7 +99,12 @@ fun <T> T.addSelect(vararg fields: Renderable): T where T : AbstractWrapper<*, *
  * @param condition the condition to add
  * @return this wrapper for chaining
  */
-fun <T : AbstractWrapper<*, *, T>> T.addCondition(condition: Condition): T = nested { it.apply(condition.render(WrapperRender(it))) }
+fun <T : AbstractWrapper<*, *, T>> T.addCondition(condition: Condition): T {
+    if (condition !is CompositeExpr) {
+        return apply(condition.render(WrapperRender(this)))
+    }
+    return nested { it.apply(condition.render(WrapperRender(it))) }
+}
 
 /**
  * Alias for [addCondition] - adds a condition using AND logic.

@@ -28,7 +28,7 @@ import com.github.ian4hu.mybatis.max.Expr.Companion.literal
 import com.github.ian4hu.mybatis.max.Expr.Companion.not
 import com.github.ian4hu.mybatis.max.Expr.Companion.or
 import com.github.ian4hu.mybatis.max.Expr.Companion.xor
-import com.github.ian4hu.mybatis.max.entity.BlockStorageDBO
+import com.github.ian4hu.mybatis.max.entity.SampleDBO
 import com.github.ian4hu.mybatis.max.expr.ConstantExpr
 import com.github.ian4hu.mybatis.max.render.WrapperRender
 import org.apache.ibatis.type.BigIntegerTypeHandler
@@ -72,7 +72,7 @@ class ExprTest : MybatisBootstrap {
                 lambda(JavaHelperTest.metadata()),
                 constant(true),
                 constant("A"),
-                kotlinProperty(BlockStorageDBO::id),
+                kotlinProperty(SampleDBO::id),
                 column("out_biz_id"),
                 constant(null),
                 ConstantExpr(Double.valueOf("10")),
@@ -107,7 +107,7 @@ class ExprTest : MybatisBootstrap {
             .of(
                 "QueryWrapper" to Wrappers.query<Any>(),
                 "LambdaQueryWrapper" to Wrappers.lambdaQuery(),
-                "KtQueryWrapper" to KtQueryWrapper(BlockStorageDBO::class.java),
+                "KtQueryWrapper" to KtQueryWrapper(SampleDBO::class.java),
             ).map { of(it.first, it.second) }
 
         @JvmStatic
@@ -160,7 +160,7 @@ class ExprTest : MybatisBootstrap {
                     "NOT (A AND B) OR (B AND C)",
                 ),
                 of(lambda(JavaHelperTest.metadata()), "metadata"),
-                of(kotlinProperty(BlockStorageDBO::outBizId), "out_biz_id"),
+                of(kotlinProperty(SampleDBO::outBizId), "out_biz_id"),
                 of(functionCall("concat", literal("A"), literal("B")), "concat(A,B)"),
                 of(column("id").alias("aid"), "id AS aid"),
                 of(column("id").alias("aid").alias("bid"), "id AS bid"),
@@ -187,9 +187,9 @@ class ExprTest : MybatisBootstrap {
     ) {
         val properties =
             mapOf(
-                BlockStorageDBO::id to "id",
-                BlockStorageDBO::outBizId to "out_biz_id",
-                BlockStorageDBO::buffSize to "buff_size",
+                SampleDBO::id to "id",
+                SampleDBO::outBizId to "out_biz_id",
+                SampleDBO::buffSize to "buff_size",
             )
 
         for ((k, v) in properties) {

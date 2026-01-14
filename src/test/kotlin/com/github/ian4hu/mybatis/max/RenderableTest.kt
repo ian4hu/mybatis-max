@@ -16,7 +16,7 @@
 package com.github.ian4hu.mybatis.max
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers
-import com.github.ian4hu.mybatis.max.entity.BlockStorageDBO
+import com.github.ian4hu.mybatis.max.entity.SampleDBO
 import com.github.ian4hu.mybatis.max.render.WrapperRender
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
@@ -148,7 +148,7 @@ class RenderableTest : MybatisBootstrap {
 
     @Test
     fun testAliasWithLambda() {
-        val wrapper = Wrappers.query<BlockStorageDBO>()
+        val wrapper = Wrappers.query<SampleDBO>()
         val render = WrapperRender(wrapper)
 
         // Test lambda expression with alias
@@ -160,11 +160,11 @@ class RenderableTest : MybatisBootstrap {
 
     @Test
     fun testAliasWithKotlinProperty() {
-        val wrapper = Wrappers.query<BlockStorageDBO>()
+        val wrapper = Wrappers.query<SampleDBO>()
         val render = WrapperRender(wrapper)
 
         // Test Kotlin property with alias
-        val property = Expr.kotlinProperty(BlockStorageDBO::buffSize)
+        val property = Expr.kotlinProperty(SampleDBO::buffSize)
         val aliased = property.alias("buffer_size")
         val result = aliased.render(render)
         assertEquals("buff_size AS buffer_size", result)

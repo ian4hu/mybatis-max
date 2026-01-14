@@ -26,7 +26,7 @@ import java.util.function.Supplier;
 import com.baomidou.mybatisplus.core.conditions.AbstractWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.github.ian4hu.mybatis.max.entity.BlockStorageDBO;
+import com.github.ian4hu.mybatis.max.entity.SampleDBO;
 import com.github.ian4hu.mybatis.max.render.WrapperRender;
 
 import org.junit.jupiter.api.Test;
@@ -79,9 +79,9 @@ public class JavaExprTest implements MybatisBootstrap {
 	@Test
 	public void testLambda() {
 		List<Supplier<AbstractWrapper<?, ?, ?>>> wrappers = Arrays.asList(Wrappers::query,
-			() -> Wrappers.lambdaQuery(BlockStorageDBO.class));
+			() -> Wrappers.lambdaQuery(SampleDBO.class));
 		for (Supplier<AbstractWrapper<?, ?, ?>> wrapper : wrappers) {
-			String result = Expr.lambda(BlockStorageDBO::getOutBizId).render(new WrapperRender(wrapper.get()));
+			String result = Expr.lambda(SampleDBO::getOutBizId).render(new WrapperRender(wrapper.get()));
 			assertEquals("out_biz_id", result);
 		}
 	}

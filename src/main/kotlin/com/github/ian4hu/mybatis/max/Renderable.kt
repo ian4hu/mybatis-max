@@ -15,7 +15,6 @@
  */
 package com.github.ian4hu.mybatis.max
 
-import com.baomidou.mybatisplus.core.conditions.AbstractWrapper
 import com.github.ian4hu.mybatis.max.expr.Alias
 
 /**
@@ -42,5 +41,5 @@ interface Renderable {
      * @param alias the SQL alias name (e.g., "user_name" or "total_count")
      * @return an [Alias] wrapping this renderable with the specified alias name
      */
-    fun alias(alias: String): Alias = if (this is Alias) Alias(alias, this.expr) else Alias(alias, this)
+    infix fun alias(alias: String): Alias = if (this is Alias) Alias(alias, this.expr) else Alias(alias, this)
 }

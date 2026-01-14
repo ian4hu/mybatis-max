@@ -21,7 +21,7 @@ import com.baomidou.mybatisplus.core.conditions.query.Query
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper
 import com.baomidou.mybatisplus.core.toolkit.Wrappers
 import com.baomidou.mybatisplus.extension.kotlin.KtQueryWrapper
-import com.github.ian4hu.mybatis.max.entity.BlockStorageDBO
+import com.github.ian4hu.mybatis.max.entity.SampleDBO
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -38,9 +38,9 @@ internal class HelperTest : MybatisBootstrap {
         for (
         wrapper in
         arrayOf(
-            Wrappers.query(BlockStorageDBO::class.java),
-            Wrappers.lambdaQuery(BlockStorageDBO::class.java),
-            KtQueryWrapper(BlockStorageDBO()),
+            Wrappers.query(SampleDBO::class.java),
+            Wrappers.lambdaQuery(SampleDBO::class.java),
+            KtQueryWrapper(SampleDBO()),
         )
         ) {
             val wrapColumn = Helper.wrapColumn(wrapper, "name")
@@ -49,7 +49,7 @@ internal class HelperTest : MybatisBootstrap {
             val wrapLambda = Helper.wrapLambda(wrapper, JavaHelperTest.metadata())
             assertEquals("metadata", wrapLambda)
 
-            val wrapProp = Helper.wrapProperty(wrapper, BlockStorageDBO::buffer)
+            val wrapProp = Helper.wrapProperty(wrapper, SampleDBO::buffer)
             assertEquals("buffer", wrapProp)
 
             val param = Helper.wrapParam(wrapper, "A", null)
@@ -64,15 +64,15 @@ internal class HelperTest : MybatisBootstrap {
     fun testSqlSelect() {
         val wrappers =
             mutableSetOf<Query<*, *, *>>().apply {
-                val ktQueryWrapper = KtQueryWrapper(BlockStorageDBO::class.java)
-                ktQueryWrapper.select(BlockStorageDBO::metadata)
+                val ktQueryWrapper = KtQueryWrapper(SampleDBO::class.java)
+                ktQueryWrapper.select(SampleDBO::metadata)
                 add(ktQueryWrapper)
 
-                val lambdaQueryWrapper = LambdaQueryWrapper<BlockStorageDBO>()
+                val lambdaQueryWrapper = LambdaQueryWrapper<SampleDBO>()
                 lambdaQueryWrapper.select(JavaHelperTest.metadata())
                 add(lambdaQueryWrapper)
 
-                val queryWrapper = QueryWrapper<BlockStorageDBO>()
+                val queryWrapper = QueryWrapper<SampleDBO>()
                 queryWrapper.select("metadata")
                 add(queryWrapper)
             }

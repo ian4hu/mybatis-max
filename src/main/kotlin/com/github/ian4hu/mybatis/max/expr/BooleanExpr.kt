@@ -13,9 +13,14 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package com.github.ian4hu.mybatis.max.mapper
+package com.github.ian4hu.mybatis.max.expr
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper
-import com.github.ian4hu.mybatis.max.entity.BlockStorageDBO
+import com.github.ian4hu.mybatis.max.Expr
 
-interface BlockStorageMapper : BaseMapper<BlockStorageDBO>
+/**
+ * @author ian
+ * @date 2026/01/14
+ */
+interface BooleanExpr : Expr {
+    fun and(b: BooleanExpr): BooleanExpr
+}

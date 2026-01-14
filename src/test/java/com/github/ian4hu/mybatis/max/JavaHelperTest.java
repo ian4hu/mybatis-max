@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import com.baomidou.mybatisplus.core.conditions.Helper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
-import com.github.ian4hu.mybatis.max.entity.BlockStorageDBO;
+import com.github.ian4hu.mybatis.max.entity.SampleDBO;
 
 import org.junit.jupiter.api.Test;
 
@@ -32,11 +32,11 @@ public class JavaHelperTest implements MybatisBootstrap {
 
 	@Test
 	public void testWrapColumn() {
-		String column = Helper.wrapLambda(Wrappers.lambdaQuery(BlockStorageDBO.class), BlockStorageDBO::getBuffer);
+		String column = Helper.wrapLambda(Wrappers.lambdaQuery(SampleDBO.class), SampleDBO::getBuffer);
 		assertEquals("buffer", column);
 	}
 
-	public static SFunction<BlockStorageDBO, String> metadata() {
-		return BlockStorageDBO::getMetadata;
+	public static SFunction<SampleDBO, String> metadata() {
+		return SampleDBO::getMetadata;
 	}
 }

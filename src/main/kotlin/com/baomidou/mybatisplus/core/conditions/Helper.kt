@@ -182,12 +182,12 @@ object Helper {
     fun getSqlSelect(wrapper: Query<*, *, *>): SharedString {
         // Unwrap proxy
         val target = AopUtils.getTargetObject(wrapper)
-        val clazz = target.javaClass
+        val queryType = target.javaClass
         val sqlSelectHandle =
-            SQL_SELECT_HANDLES.getOrPut(clazz) {
+            SQL_SELECT_HANDLES.getOrPut(queryType) {
                 MethodHandles
-                    .privateLookupIn(clazz, MethodHandles.lookup())
-                    .findVarHandle(clazz, "sqlSelect", SharedString::class.java)
+                    .privateLookupIn(queryType, MethodHandles.lookup())
+                    .findVarHandle(queryType, "sqlSelect", SharedString::class.java)
             }
         return sqlSelectHandle.get(target) as SharedString
     }
