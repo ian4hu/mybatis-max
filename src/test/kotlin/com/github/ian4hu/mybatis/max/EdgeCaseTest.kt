@@ -20,7 +20,6 @@ import com.github.ian4hu.mybatis.max.render.WrapperRender
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
 /**
@@ -298,9 +297,9 @@ class EdgeCaseTest : MybatisBootstrap {
         val render = WrapperRender(wrapper)
 
         // Create deeply nested expression
-        var expr: Condition = Expr.literal("A").and(Expr.literal("B"))
+        var expr: Condition = Expr.literal("A").asCondition().and(Expr.literal("B").asCondition())
         for (i in 3..10) {
-            expr = expr.and(Expr.literal("L$i"))
+            expr = expr.and(Expr.literal("L$i").asCondition())
         }
 
         val result = expr.render(render)
@@ -314,15 +313,15 @@ class EdgeCaseTest : MybatisBootstrap {
         val render = WrapperRender(wrapper)
 
         // Double NOT should cancel out
-        val doubleNot = Expr.literal("A").not().not()
+        val doubleNot = Expr.literal("A").asCondition().not().not()
         assertEquals("A", doubleNot.render(render))
 
         // Triple NOT should be single NOT
-        val tripleNot = Expr.literal("B").not().not().not()
+        val tripleNot = Expr.literal("B").asCondition().not().not().not()
         assertEquals("NOT B", tripleNot.render(render))
 
         // Quadruple NOT should cancel out
-        val quadNot = Expr.literal("C").not().not().not().not()
+        val quadNot = Expr.literal("C").asCondition().not().not().not().not()
         assertEquals("C", quadNot.render(render))
     }
 

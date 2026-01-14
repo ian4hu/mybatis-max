@@ -19,7 +19,6 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers
 import com.github.ian4hu.mybatis.max.render.WrapperRender
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 /**
@@ -87,20 +86,20 @@ class BinaryOperatorTest : MybatisBootstrap {
         val render = WrapperRender(wrapper)
 
         // Test XOR with static method
-        val condition = Expr.xor(Expr.literal("A"), Expr.literal("B"))
+        val condition = Condition.xor(Expr.literal("A").asCondition(), Expr.literal("B").asCondition())
         val result = condition.render(render)
         assertEquals("A XOR B", result)
 
         // Test XOR with instance method
-        val instanceCondition = Expr.literal("X").xor(Expr.literal("Y"))
+        val instanceCondition = Expr.literal("X").asCondition().xor(Expr.literal("Y").asCondition())
         val instanceResult = instanceCondition.render(render)
         assertEquals("X XOR Y", instanceResult)
 
         // Test multiple XOR
-        val multiCondition = Expr.xor(
-            Expr.literal("P"),
-            Expr.literal("Q"),
-            Expr.literal("R"),
+        val multiCondition = Condition.xor(
+            Expr.literal("P").asCondition(),
+            Expr.literal("Q").asCondition(),
+            Expr.literal("R").asCondition(),
         )
         val multiResult = multiCondition.render(render)
         assertEquals("P XOR Q XOR R", multiResult)
@@ -112,8 +111,8 @@ class BinaryOperatorTest : MybatisBootstrap {
         val render = WrapperRender(wrapper)
 
         // Test that nested XOR expressions are flattened
-        val innerXor = Expr.literal("A").xor(Expr.literal("B"))
-        val outerXor = innerXor.xor(Expr.literal("C"))
+        val innerXor = Expr.literal("A").asCondition().xor(Expr.literal("B").asCondition())
+        val outerXor = innerXor.xor(Expr.literal("C").asCondition())
         val result = outerXor.render(render)
         assertEquals("A XOR B XOR C", result)
     }
@@ -124,11 +123,13 @@ class BinaryOperatorTest : MybatisBootstrap {
         val render = WrapperRender(wrapper)
 
         // Test that duplicate expressions are removed
-        val litA = Expr.literal("A")
-        val condition = Expr.xor(litA, Expr.literal("B"), litA, Expr.literal("C"))
+        val litA = Condition.literal("A")
+        val condition = Condition.xor(litA, Condition.literal("B"), litA, Condition.literal("C"))
         val result = condition.render(render)
         // Duplicates should be removed, so only A, B, C remain
-        assertEquals("A XOR B XOR C", result)
+        assertEquals("B XOR C", result)
+
+        assertEquals("0", litA.xor(litA).render(render))
     }
 
     @Test
@@ -183,7 +184,7 @@ class BinaryOperatorTest : MybatisBootstrap {
         val render = WrapperRender(wrapper)
 
         // Test that composite expressions are wrapped in parentheses
-        val inner = Expr.literal("A").and(Expr.literal("B"))
+        val inner = Expr.literal("A").asCondition().and(Expr.literal("B").asCondition())
         val outer = BinaryOp.BIT_AND.of(inner, Expr.constant(1))
         val result = outer.render(render)
         assertEquals("(A AND B) & 1", result)
@@ -250,16 +251,16 @@ class BinaryOperatorTest : MybatisBootstrap {
         val render = WrapperRender(wrapper)
 
         // Test deeply nested operations
-        val a = Expr.literal("A")
-        val b = Expr.literal("B")
-        val c = Expr.literal("C")
-        val d = Expr.literal("D")
+        val a = Expr.literal("A").asCondition()
+        val b = Expr.literal("B").asCondition()
+        val c = Expr.literal("C").asCondition()
+        val d = Expr.literal("D").asCondition()
 
         // ((A AND B) OR (C AND D)) XOR E
         val ab = a.and(b)
         val cd = c.and(d)
         val or = ab.or(cd)
-        val xor = or.xor(Expr.literal("E"))
+        val xor = or.xor(Expr.literal("E").asCondition())
 
         val result = xor.render(render)
         assertEquals("((A AND B) OR (C AND D)) XOR E", result)

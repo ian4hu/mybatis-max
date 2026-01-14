@@ -16,6 +16,7 @@
 package com.github.ian4hu.mybatis.max.render
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers
+import com.github.ian4hu.mybatis.max.Condition
 import com.github.ian4hu.mybatis.max.Expr
 import com.github.ian4hu.mybatis.max.MybatisBootstrap
 import com.github.ian4hu.mybatis.max.eq
@@ -53,10 +54,10 @@ class WrapperRenderTest : MybatisBootstrap {
     fun testCondidtion() {
         val wrapper = Wrappers.query<Any>()
         assertEquals("", wrapper.sqlSegment)
-        wrapper.addCondition(Expr.and(Expr.literal("A"), Expr.literal("B")))
+        wrapper.addCondition(Condition.and(Condition.literal("A"), Condition.literal("B")))
         assertEquals("((A AND B))", wrapper.sqlSegment)
 
-        wrapper.or(Expr.literal("C").or(Expr.literal("D")))
+        wrapper.or(Condition.literal("C").or(Condition.literal("D")))
         assertEquals("((A AND B) OR (C OR D))", wrapper.sqlSegment)
 
         wrapper.clearCondition(false)
@@ -65,7 +66,7 @@ class WrapperRenderTest : MybatisBootstrap {
 
         wrapper.clearCondition()
 
-        wrapper.and(Expr.literal("E").or(Expr.literal("F")))
+        wrapper.and(Condition.literal("E").or(Condition.literal("F")))
         assertEquals("((E OR F))", wrapper.sqlSegment)
 
         wrapper.and(Expr.column("id").eq(Expr.literal("12")).and(Expr.column("username").eq(Expr.functionCall("current_timestamp"))))

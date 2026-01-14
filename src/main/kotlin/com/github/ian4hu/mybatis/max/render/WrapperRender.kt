@@ -18,8 +18,6 @@ package com.github.ian4hu.mybatis.max.render
 import com.baomidou.mybatisplus.core.conditions.AbstractWrapper
 import com.baomidou.mybatisplus.core.conditions.Helper
 import com.baomidou.mybatisplus.core.conditions.query.Query
-import com.baomidou.mybatisplus.core.enums.SqlKeyword
-import com.baomidou.mybatisplus.core.enums.WrapperKeyword
 import com.baomidou.mybatisplus.core.toolkit.StringPool
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction
 import com.github.ian4hu.mybatis.max.Condition
@@ -128,7 +126,7 @@ fun <T : AbstractWrapper<*, *, T>> T.or(condition: Condition): T = this.or().add
 fun <T : AbstractWrapper<*, *, T>> T.clearCondition(condition: Boolean = true): T {
     if (condition) {
         // Trigger an update for [MergeSegments]'s cacheSqlSegment
-        addCondition(Expr.and(Expr.literal("TRUE"), Expr.literal("TRUE")))
+        addCondition(Condition.and(Expr.literal("TRUE").asCondition(), Expr.literal("TRUE").asCondition()))
         expression.normal.clear()
     }
     return this

@@ -24,7 +24,7 @@ import com.github.ian4hu.mybatis.max.Expr
  * Wraps expressions that are already valid boolean conditions (e.g., boolean columns,
  * boolean literals, or function calls returning boolean) to satisfy the Condition interface.
  */
-internal class DummyCondition(val condition: Expr) :
+internal data class DummyCondition(val condition: Expr) :
     Condition,
     Expr by condition {
     companion object {

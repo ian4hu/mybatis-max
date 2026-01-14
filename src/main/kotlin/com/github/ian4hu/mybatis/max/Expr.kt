@@ -16,6 +16,7 @@
 package com.github.ian4hu.mybatis.max
 
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction
+import com.github.ian4hu.mybatis.max.conditions.DummyCondition
 import com.github.ian4hu.mybatis.max.expr.ColumnExpr
 import com.github.ian4hu.mybatis.max.expr.ConstantExpr
 import com.github.ian4hu.mybatis.max.expr.FunctionCallExpr
@@ -140,97 +141,7 @@ interface Expr : Renderable {
             fn: String,
             vararg args: Any?,
         ): Expr = FunctionCallExpr(fn, *args)
-
-        /**
-         * Combines multiple expressions using AND.
-         *
-         * @param a the first expression
-         * @param b the second expression
-         * @param others additional expressions
-         * @return AND expression
-         */
-        @JvmStatic fun and(
-            a: Expr,
-            b: Expr,
-            vararg others: Expr,
-        ): Condition = a.and(b, *others)
-
-        /**
-         * Combines multiple expressions using OR.
-         *
-         * @param a the first expression
-         * @param b the second expression
-         * @param others additional expressions
-         * @return OR expression
-         */
-        @JvmStatic fun or(
-            a: Expr,
-            b: Expr,
-            vararg others: Expr,
-        ): Condition = a.or(b, *others)
-
-        /**
-         * Negates an expression using NOT.
-         *
-         * @param a the expression to negate
-         * @return NOT expression
-         */
-        @JvmStatic fun not(a: Expr): Condition = a.not()
-
-        /**
-         * Combines multiple expressions using XOR.
-         *
-         * @param a the first expression
-         * @param b the second expression
-         * @param others additional expressions
-         * @return XOR expression
-         */
-        @JvmStatic fun xor(a: Expr, b: Expr, vararg others: Expr): Condition = a.xor(b, *others)
     }
-
-    /**
-     * Combines this expression with others using AND.
-     *
-     * Flattens nested ANDs and removes duplicates.
-     *
-     * @param b the second expression
-     * @param expr additional expressions
-     * @return AND expression, or single expression if optimized to one
-     */
-    fun and(b: Expr, vararg expr: Expr): Condition = BinaryOp.AND.of(this, b, *expr)
-
-    infix fun and(b: Expr) = BinaryOp.AND.of(this, b)
-
-    /**
-     * Combines this expression with others using XOR.
-     *
-     * @param b the second expression
-     * @param expr additional expressions
-     * @return XOR expression
-     */
-    fun xor(b: Expr, vararg expr: Expr): Condition = BinaryOp.XOR.of(this, b, *expr)
-
-    /**
-     * Combines this expression with others using OR.
-     *
-     * Flattens nested ORs and removes duplicates.
-     *
-     * @param b the second expression
-     * @param expr additional expressions
-     * @return OR expression, or single expression if optimized to one
-     */
-    fun or(b: Expr, vararg expr: Expr): Condition = BinaryOp.OR.of(this, b, *expr)
-
-    infix fun or(b: Expr) = BinaryOp.OR.of(this, b)
-
-    /**
-     * Negates this expression using NOT.
-     *
-     * Double negation is automatically eliminated.
-     *
-     * @return NOT expression, or original expression if already negated
-     */
-    fun not(): Condition = UnaryBooleanOp.NOT.of(this)
 
     /** Creates a NOT NULL condition: `a IS NOT NULL` */
     fun isNotNull(): Condition = isNull().not()
@@ -247,4 +158,6 @@ interface Expr : Renderable {
 
     /** Creates a negated boolean check condition */
     fun isNotBool(bool: Boolean?): Condition = isBool(bool).not()
+
+    fun asCondition(): Condition = DummyCondition.of(this)
 }

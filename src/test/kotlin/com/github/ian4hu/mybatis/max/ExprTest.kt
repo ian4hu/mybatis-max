@@ -18,16 +18,15 @@ package com.github.ian4hu.mybatis.max
 import com.baomidou.mybatisplus.core.conditions.AbstractWrapper
 import com.baomidou.mybatisplus.core.toolkit.Wrappers
 import com.baomidou.mybatisplus.extension.kotlin.KtQueryWrapper
-import com.github.ian4hu.mybatis.max.Expr.Companion.and
+import com.github.ian4hu.mybatis.max.Condition.Companion.and
+import com.github.ian4hu.mybatis.max.Condition.Companion.not
+import com.github.ian4hu.mybatis.max.Condition.Companion.or
+import com.github.ian4hu.mybatis.max.Condition.Companion.xor
 import com.github.ian4hu.mybatis.max.Expr.Companion.column
 import com.github.ian4hu.mybatis.max.Expr.Companion.constant
 import com.github.ian4hu.mybatis.max.Expr.Companion.functionCall
 import com.github.ian4hu.mybatis.max.Expr.Companion.kotlinProperty
 import com.github.ian4hu.mybatis.max.Expr.Companion.lambda
-import com.github.ian4hu.mybatis.max.Expr.Companion.literal
-import com.github.ian4hu.mybatis.max.Expr.Companion.not
-import com.github.ian4hu.mybatis.max.Expr.Companion.or
-import com.github.ian4hu.mybatis.max.Expr.Companion.xor
 import com.github.ian4hu.mybatis.max.entity.SampleDBO
 import com.github.ian4hu.mybatis.max.expr.ConstantExpr
 import com.github.ian4hu.mybatis.max.render.WrapperRender
@@ -335,3 +334,5 @@ class ExprTest : MybatisBootstrap {
         }
     }
 }
+
+fun literal(name: String) = Expr.literal(name).asCondition()

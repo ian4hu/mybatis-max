@@ -23,7 +23,127 @@ import kotlin.reflect.KProperty1
  * Conditions are expressions that evaluate to boolean values in SQL.
  * Use comparison operators (eq, ne, gt, etc.) or logical operators (and, or, not) to build conditions.
  */
-interface Condition : Expr
+interface Condition : Expr {
+
+    /**
+     * Combines this expression with others using AND.
+     *
+     * Flattens nested ANDs and removes duplicates.
+     *
+     * @param b the second expression
+     * @param expr additional expressions
+     * @return AND expression, or single expression if optimized to one
+     */
+    fun and(b: Condition, vararg expr: Condition): Condition = BinaryOp.AND.of(this, b, *expr)
+
+    /**
+     * Combines this expression with others using XOR.
+     *
+     * @param b the second expression
+     * @param expr additional expressions
+     * @return XOR expression
+     */
+
+    fun xor(b: Condition, vararg expr: Condition): Condition = BinaryOp.XOR.of(this, b, *expr)
+
+    /**
+     * Combines this expression with others using OR.
+     *
+     * Flattens nested ORs and removes duplicates.
+     *
+     * @param b the second expression
+     * @param expr additional expressions
+     * @return OR expression, or single expression if optimized to one
+     */
+    fun or(b: Condition, vararg expr: Condition): Condition = BinaryOp.OR.of(this, b, *expr)
+
+    /**
+     * Negates this expression using NOT.
+     *
+     * Double negation is automatically eliminated.
+     *
+     * @return NOT expression, or original expression if already negated
+     */
+    fun not(): Condition = UnaryBooleanOp.NOT.of(this)
+
+    /**
+     * Combines this expression with others using AND.
+     *
+     * Flattens nested ANDs and removes duplicates.
+     *
+     * @param b the second expression
+     * @return AND expression, or single expression if optimized to one
+     */
+    infix fun and(b: Condition) = BinaryOp.AND.of(this, b)
+
+    /**
+     * Combines this expression with others using OR.
+     *
+     * Flattens nested ORs and removes duplicates.
+     *
+     * @param b the second expression
+     * @return OR expression, or single expression if optimized to one
+     */
+    infix fun or(b: Condition) = BinaryOp.OR.of(this, b)
+
+    /**
+     * Combines this expression with others using XOR.
+     *
+     * @param b the second expression
+     * @return XOR expression
+     */
+    fun xor(b: Condition): Condition = BinaryOp.XOR.of(this, b)
+
+    companion object {
+        /**
+         * Combines multiple expressions using AND.
+         *
+         * @param a the first expression
+         * @param b the second expression
+         * @param others additional expressions
+         * @return AND expression
+         */
+        @JvmStatic fun and(
+            a: Condition,
+            b: Condition,
+            vararg others: Condition,
+        ): Condition = a.and(b, *others)
+
+        /**
+         * Combines multiple expressions using OR.
+         *
+         * @param a the first expression
+         * @param b the second expression
+         * @param others additional expressions
+         * @return OR expression
+         */
+        @JvmStatic fun or(
+            a: Condition,
+            b: Condition,
+            vararg others: Condition,
+        ): Condition = a.or(b, *others)
+
+        /**
+         * Negates an expression using NOT.
+         *
+         * @param a the expression to negate
+         * @return NOT expression
+         */
+        @JvmStatic fun not(a: Condition): Condition = a.not()
+
+        /**
+         * Combines multiple expressions using XOR.
+         *
+         * @param a the first expression
+         * @param b the second expression
+         * @param others additional expressions
+         * @return XOR expression
+         */
+        @JvmStatic fun xor(a: Condition, b: Condition, vararg others: Condition): Condition = a.xor(b, *others)
+
+        fun literal(value: String): Condition = Expr.literal(value).asCondition()
+    }
+}
 
 /** Creates an equality condition: `a = b` */
 infix fun Expr.eq(b: Expr): Condition = ComparisonOp.EqualTo.of(this, b)

@@ -55,12 +55,48 @@ data class BinaryExpr(val op: BinaryOp, val elements: List<Expr>) :
          * @return optimized condition expression
          */
         fun of(op: BinaryOp, a: Expr, b: Expr, vararg expr: Expr): Condition {
-            val elements = arrayOf(a, b, *expr)
-                .flatMap { if (it is BinaryExpr && it.op == op) it.elements else listOf(it) }.distinct()
-            if (elements.size == 1) {
-                return DummyCondition.of(elements[0])
+
+            // 逻辑运算符满足交换律和结合率，因此需要先进行展开打平
+            val elements = flatten(op, arrayOf(a, b, *expr))
+            val optimized = when (op) {
+                BinaryOp.XOR -> xorOptimizer(elements)
+                else -> andOrOptimizer(elements)
             }
-            return BinaryExpr(op, elements)
+            if (optimized.isEmpty()) {
+                // For XOR, all duplicate conditions are optimized, it means the condition is always false
+                return Condition.literal("0")
+            }
+            // 根据运算符确认如何优化
+            if (optimized.size == 1) {
+                return DummyCondition.of(optimized[0])
+            }
+
+            return BinaryExpr(op, optimized)
+        }
+
+        private fun flatten(op: BinaryOp, expr: Expr): List<Expr> {
+            return when {
+                expr !is BinaryExpr -> listOf(expr)
+                expr.op != op -> listOf(expr)
+                else -> expr.elements.flatMap { flatten(op, it) }
+            }
+        }
+
+        private fun flatten(op: BinaryOp, expr: Array<Expr>): List<Expr> {
+            return expr.flatMap { flatten(op, it) }
+        }
+
+        private fun andOrOptimizer(elements: List<Expr>): List<Expr> {
+            return elements.distinct()
+        }
+
+        private fun xorOptimizer(elements: List<Expr>): List<Expr> {
+            val parityMap = mutableMapOf<Expr, Boolean>()
+            for (expr in elements) {
+                parityMap[expr] = !(parityMap[expr] ?: false)
+            }
+            return parityMap.filter { (_, keep) -> keep } .keys.toList()
         }
     }
+
 }

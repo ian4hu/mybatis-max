@@ -96,13 +96,13 @@ class RenderableTest : MybatisBootstrap {
         val render = WrapperRender(wrapper)
 
         // Test that composite expressions are wrapped in parentheses when aliased
-        val composite = Expr.literal("A").and(Expr.literal("B"))
+        val composite = literal("A").and(literal("B"))
         val aliased = composite.alias("condition")
         val result = aliased.render(render)
         assertEquals("(A AND B) AS condition", result)
 
         // Test OR expression
-        val orComposite = Expr.literal("X").or(Expr.literal("Y"))
+        val orComposite = literal("X").or(literal("Y"))
         val orAliased = orComposite.alias("choice")
         val orResult = orAliased.render(render)
         assertEquals("(X OR Y) AS choice", orResult)
@@ -141,7 +141,7 @@ class RenderableTest : MybatisBootstrap {
         val render = WrapperRender(wrapper)
 
         // Test literal with alias
-        val literal = Expr.literal("STATUS").alias("current_status")
+        val literal = literal("STATUS").alias("current_status")
         val result = literal.render(render)
         assertEquals("STATUS AS current_status", result)
     }
@@ -189,9 +189,9 @@ class RenderableTest : MybatisBootstrap {
         val render = WrapperRender(wrapper)
 
         // Test deeply nested composite expression
-        val inner = Expr.literal("A").and(Expr.literal("B"))
-        val middle = inner.or(Expr.literal("C"))
-        val outer = middle.and(Expr.literal("D"))
+        val inner = literal("A").and(literal("B"))
+        val middle = inner.or(literal("C"))
+        val outer = middle.and(literal("D"))
         val aliased = outer.alias("complex")
         val result = aliased.render(render)
         assertEquals("(((A AND B) OR C) AND D) AS complex", result)
@@ -205,13 +205,13 @@ class RenderableTest : MybatisBootstrap {
 
         val renderables = listOf(
             Expr.column("id"),
-            Expr.literal("VALUE"),
+            literal("VALUE"),
             Expr.constant(42),
             Expr.variable("param"),
             Expr.functionCall("NOW"),
-            Expr.literal("A").and(Expr.literal("B")),
-            Expr.literal("X").or(Expr.literal("Y")),
-            Expr.literal("Z").not(),
+            literal("A").and(literal("B")),
+            literal("X").or(literal("Y")),
+            literal("Z").not(),
             Expr.column("age").eq(Expr.constant(18)),
         )
 
@@ -232,7 +232,7 @@ class RenderableTest : MybatisBootstrap {
         // Start with column, add operations, then alias
         val expr = Expr.column("value")
             .eq(Expr.constant(10))
-            .and(Expr.column("status").eq(Expr.literal("OK")))
+            .and(Expr.column("status").eq(literal("OK")))
             .alias("is_valid")
 
         val result = expr.render(render)

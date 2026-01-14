@@ -138,18 +138,6 @@ class SqlDSLTest : MybatisBootstrap {
                 }
             }.sqlSegment,
         )
-
-        // Without parentesis the sql is not corrent
-        assertEquals(
-            "(id=out_biz_id AND id=A OR id=B)",
-            sql(Wrappers.query<Any>()) {
-                where {
-                    (SampleDBO::id eq SampleDBO::outBizId) and
-                        +SampleDBO::id eq Expr.literal("A") or
-                        +SampleDBO::id eq Expr.literal("B")
-                }
-            }.sqlSegment,
-        )
     }
 
     @Test
