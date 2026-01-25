@@ -15,6 +15,7 @@
  */
 package com.github.ian4hu.mybatis.exposed.dsl
 
+import com.github.ian4hu.mybatis.exposed.ComparisonOp
 import com.github.ian4hu.mybatis.exposed.Condition
 import com.github.ian4hu.mybatis.exposed.Expr
 import kotlin.reflect.KProperty1
@@ -27,4 +28,76 @@ class WhereDSL {
     operator fun String.unaryPlus(): Expr = Expr.column(this)
 
     inline operator fun <reified T> KProperty1<T, *>.unaryPlus(): Expr = Expr.kotlinProperty(this, T::class.java)
+
+    // ============ Infix Comparison Operators ============
+
+    /**
+     * Infix equality operator: `expr eq value`
+     *
+     * @param other the value to compare with (automatically converted to Expr)
+     * @return Condition representing `this = other`
+     */
+    infix fun Expr.eq(other: Any?): Condition = this.equalTo(toExpr(other))
+
+    /**
+     * Infix inequality operator: `expr ne value`
+     *
+     * @param other the value to compare with (automatically converted to Expr)
+     * @return Condition representing `this <> other`
+     */
+    infix fun Expr.ne(other: Any?): Condition = ComparisonOp.NotEqualTo.of(this, toExpr(other))
+
+    /**
+     * Infix greater-than operator: `expr gt value`
+     *
+     * @param other the value to compare with (automatically converted to Expr)
+     * @return Condition representing `this > other`
+     */
+    infix fun Expr.gt(other: Any?): Condition = ComparisonOp.GreaterThan.of(this, toExpr(other))
+
+    /**
+     * Infix greater-or-equal operator: `expr ge value`
+     *
+     * @param other the value to compare with (automatically converted to Expr)
+     * @return Condition representing `this >= other`
+     */
+    infix fun Expr.ge(other: Any?): Condition = ComparisonOp.GreaterOrEqualTo.of(this, toExpr(other))
+
+    /**
+     * Infix less-than operator: `expr lt value`
+     *
+     * @param other the value to compare with (automatically converted to Expr)
+     * @return Condition representing `this < other`
+     */
+    infix fun Expr.lt(other: Any?): Condition = ComparisonOp.LessThan.of(this, toExpr(other))
+
+    /**
+     * Infix less-or-equal operator: `expr le value`
+     *
+     * @param other the value to compare with (automatically converted to Expr)
+     * @return Condition representing `this <= other`
+     */
+    infix fun Expr.le(other: Any?): Condition = ComparisonOp.LessOrEqualTo.of(this, toExpr(other))
+
+    /**
+     * Infix null-safe equality operator: `expr eqNullSafe value`
+     *
+     * @param other the value to compare with (automatically converted to Expr)
+     * @return Condition representing `this <=> other`
+     */
+    infix fun Expr.eqNullSafe(other: Any?): Condition = ComparisonOp.NullSafeEqualTo.of(this, toExpr(other))
+
+    // ============ Helper Function ============
+
+    /**
+     * Converts various types to Expr.
+     * - Expr -> returned as-is
+     * - null -> Expr.literal("NULL")
+     * - Other types -> Expr.variable(value)
+     */
+    private fun toExpr(value: Any?): Expr = when (value) {
+        is Expr -> value
+        null -> Expr.literal("NULL")
+        else -> Expr.variable(value)
+    }
 }

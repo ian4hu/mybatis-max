@@ -147,4 +147,42 @@ class SqlDSLTest : MybatisBootstrap {
             }.sqlSegment,
         )
     }
+
+    @Test
+    fun testInfixOperatorSyntax() {
+        // Test new infix syntax for better readability
+        assertEquals(
+            "(A=#{ew.paramNameValuePairs.MPGENVAL1})",
+            sql(Wrappers.query<Any>()) {
+                where {
+                    +"A" eq "1"
+                }
+            }.sqlSegment,
+        )
+
+        assertEquals(
+            "(id=#{ew.paramNameValuePairs.MPGENVAL1})",
+            sql(Wrappers.query<Any>()) {
+                where {
+                    +SampleDBO::id eq "1"
+                }
+            }.sqlSegment,
+        )
+    }
+
+    @Test
+    fun testInfixOperatorWithLogicalOperators() {
+        // Test infix with and/or for more natural condition building
+        assertEquals(
+            "(((id=out_biz_id AND id=A) OR id=B))",
+            sql(Wrappers.query<Any>()) {
+                where {
+                    (
+                        (+SampleDBO::id eq +SampleDBO::outBizId) and
+                            (+SampleDBO::id eq Expr.literal("A"))
+                        ) or (+SampleDBO::id eq Expr.literal("B"))
+                }
+            }.sqlSegment,
+        )
+    }
 }
