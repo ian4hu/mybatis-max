@@ -16,6 +16,7 @@
 package com.github.ian4hu.mybatis.exposed
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers
+import com.github.ian4hu.mybatis.exposed.Condition.Companion.literal
 import com.github.ian4hu.mybatis.exposed.entity.SampleDBO
 import com.github.ian4hu.mybatis.exposed.render.WrapperRender
 import org.junit.jupiter.api.Test
@@ -212,7 +213,7 @@ class RenderableTest : MybatisBootstrap {
             literal("A").and(literal("B")),
             literal("X").or(literal("Y")),
             literal("Z").not(),
-            Expr.column("age").eq(Expr.constant(18)),
+            Expr.column("age").equalTo(Expr.constant(18)),
         )
 
         renderables.forEach { renderable ->
@@ -231,8 +232,8 @@ class RenderableTest : MybatisBootstrap {
 
         // Start with column, add operations, then alias
         val expr = Expr.column("value")
-            .eq(Expr.constant(10))
-            .and(Expr.column("status").eq(literal("OK")))
+            .equalTo(Expr.constant(10))
+            .and(Expr.column("status").equalTo(literal("OK")))
             .alias("is_valid")
 
         val result = expr.render(render)

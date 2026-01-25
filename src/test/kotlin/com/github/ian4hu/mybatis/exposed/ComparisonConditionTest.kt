@@ -34,18 +34,18 @@ class ComparisonConditionTest : MybatisBootstrap {
         val render = WrapperRender(wrapper)
 
         // Test eq extension function
-        val condition = Expr.column("age").eq(Expr.constant(18))
+        val condition = Expr.column("age").equalTo(Expr.constant(18))
         val result = condition.render(render)
         assertEquals("age=18", result)
 
         // Test with variable
-        val varCondition = Expr.column("name").eq(Expr.variable("John"))
+        val varCondition = Expr.column("name").equalTo(Expr.variable("John"))
         val varResult = varCondition.render(render)
         assertEquals("name=#{ew.paramNameValuePairs.MPGENVAL1}", varResult)
         assertEquals("John", wrapper.paramNameValuePairs["MPGENVAL1"])
 
         // Test with literal
-        val litCondition = Expr.literal("status").eq(Expr.literal("ACTIVE"))
+        val litCondition = Expr.literal("status").equalTo(Expr.literal("ACTIVE"))
         val litResult = litCondition.render(render)
         assertEquals("status=ACTIVE", litResult)
     }
@@ -157,7 +157,7 @@ class ComparisonConditionTest : MybatisBootstrap {
 
         // Test comparison between two functions
         val bothFunc = Expr.functionCall("COUNT", Expr.column("id"))
-            .eq(Expr.functionCall("SUM", Expr.constant(1)))
+            .equalTo(Expr.functionCall("SUM", Expr.constant(1)))
         val bothResult = bothFunc.render(render)
         assertEquals("COUNT(id)=SUM(1)", bothResult)
     }
@@ -170,7 +170,7 @@ class ComparisonConditionTest : MybatisBootstrap {
         // Test comparison with aliased expressions (should work without alias in comparison)
         val col1 = Expr.column("a")
         val col2 = Expr.column("b")
-        val condition = col1.eq(col2)
+        val condition = col1.equalTo(col2)
         val result = condition.render(render)
         assertEquals("a=b", result)
     }
@@ -187,8 +187,8 @@ class ComparisonConditionTest : MybatisBootstrap {
         assertEquals("age>=18 AND age<=65", andResult)
 
         // Test OR with multiple comparisons
-        val orCondition = Expr.column("status").eq(Expr.literal("ACTIVE"))
-            .or(Expr.column("status").eq(Expr.literal("PENDING")))
+        val orCondition = Expr.column("status").equalTo(Expr.literal("ACTIVE"))
+            .or(Expr.column("status").equalTo(Expr.literal("PENDING")))
         val orResult = orCondition.render(render)
         assertEquals("status=ACTIVE OR status=PENDING", orResult)
     }
@@ -199,43 +199,43 @@ class ComparisonConditionTest : MybatisBootstrap {
         val render = WrapperRender(wrapper)
 
         // Byte
-        val byteCondition = Expr.column("byte_field").eq(Expr.constant(42.toByte()))
+        val byteCondition = Expr.column("byte_field").equalTo(Expr.constant(42.toByte()))
         assertEquals("byte_field=42", byteCondition.render(render))
 
         // Short
-        val shortCondition = Expr.column("short_field").eq(Expr.constant(1000.toShort()))
+        val shortCondition = Expr.column("short_field").equalTo(Expr.constant(1000.toShort()))
         assertEquals("short_field=1000", shortCondition.render(render))
 
         // Int
-        val intCondition = Expr.column("int_field").eq(Expr.constant(123456))
+        val intCondition = Expr.column("int_field").equalTo(Expr.constant(123456))
         assertEquals("int_field=123456", intCondition.render(render))
 
         // Long
-        val longCondition = Expr.column("long_field").eq(Expr.constant(9876543210L))
+        val longCondition = Expr.column("long_field").equalTo(Expr.constant(9876543210L))
         assertEquals("long_field=9876543210", longCondition.render(render))
 
         // Float
-        val floatCondition = Expr.column("float_field").eq(Expr.constant(3.14f))
+        val floatCondition = Expr.column("float_field").equalTo(Expr.constant(3.14f))
         assertEquals("float_field=3.14", floatCondition.render(render))
 
         // Double
-        val doubleCondition = Expr.column("double_field").eq(Expr.constant(2.718281828))
+        val doubleCondition = Expr.column("double_field").equalTo(Expr.constant(2.718281828))
         assertEquals("double_field=2.718281828", doubleCondition.render(render))
 
         // Boolean
-        val boolCondition = Expr.column("active").eq(Expr.constant(true))
+        val boolCondition = Expr.column("active").equalTo(Expr.constant(true))
         assertEquals("active=true", boolCondition.render(render))
     }
 
     @Test
     fun testComparisonConditionIsCondition() {
         // Test that comparison results implement Condition interface
-        val condition = Expr.column("id").eq(Expr.constant(1))
+        val condition = Expr.column("id").equalTo(Expr.constant(1))
         assertTrue(condition is Condition)
         assertNotNull(condition)
 
         // Test that condition can be used in logical operations
-        val combined = condition.and(Expr.column("status").eq(Expr.literal("OK")))
+        val combined = condition.and(Expr.column("status").equalTo(Expr.literal("OK")))
         assertTrue(combined is Condition)
     }
 
@@ -250,7 +250,7 @@ class ComparisonConditionTest : MybatisBootstrap {
         assertEquals("big_number>1.5E10", result)
 
         // Test with constant
-        val constCondition = Expr.column("value").eq(Expr.constant("1.23E-5"))
+        val constCondition = Expr.column("value").equalTo(Expr.constant("1.23E-5"))
         val constResult = constCondition.render(render)
         assertEquals("value=1.23E-5", constResult)
     }
@@ -266,7 +266,7 @@ class ComparisonConditionTest : MybatisBootstrap {
         assertEquals("NOT age<18", result)
 
         // Test double negation
-        val doubleNot = Expr.column("active").eq(Expr.constant(true)).not().not()
+        val doubleNot = Expr.column("active").equalTo(Expr.constant(true)).not().not()
         val doubleResult = doubleNot.render(render)
         assertEquals("active=true", doubleResult)
     }
@@ -279,7 +279,7 @@ class ComparisonConditionTest : MybatisBootstrap {
         // Test complex condition: (age >= 18 AND age <= 65) OR status = 'VIP'
         val ageRange = Expr.column("age").ge(Expr.constant(18))
             .and(Expr.column("age").le(Expr.constant(65)))
-        val vipStatus = Expr.column("status").eq(Expr.literal("VIP"))
+        val vipStatus = Expr.column("status").equalTo(Expr.literal("VIP"))
         val complex = ageRange.or(vipStatus)
         val result = complex.render(render)
         assertEquals("(age>=18 AND age<=65) OR status=VIP", result)
@@ -291,11 +291,11 @@ class ComparisonConditionTest : MybatisBootstrap {
         val render = WrapperRender(wrapper)
 
         // Test with snake_case column
-        val snakeCase = Expr.column("user_name").eq(Expr.constant("admin"))
+        val snakeCase = Expr.column("user_name").equalTo(Expr.constant("admin"))
         assertEquals("user_name=admin", snakeCase.render(render))
 
         // Test with camelCase column (should be kept as is)
-        val camelCase = Expr.column("userId").eq(Expr.constant(123))
+        val camelCase = Expr.column("userId").equalTo(Expr.constant(123))
         assertEquals("userId=123", camelCase.render(render))
 
         // Test with uppercase column

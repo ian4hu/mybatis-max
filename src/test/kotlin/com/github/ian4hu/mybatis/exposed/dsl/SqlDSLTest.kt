@@ -19,7 +19,6 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers
 import com.github.ian4hu.mybatis.exposed.Expr
 import com.github.ian4hu.mybatis.exposed.MybatisBootstrap
 import com.github.ian4hu.mybatis.exposed.entity.SampleDBO
-import com.github.ian4hu.mybatis.exposed.eq
 import org.junit.jupiter.api.Assertions.assertEquals
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
@@ -44,10 +43,10 @@ class SqlDSLTest : MybatisBootstrap {
             }
 
             where {
-                Expr.column("name") eq Expr.literal("A") and
-                    (Expr.column("id").isNotNull()) or
-                    (Expr.column("id").isNotNull()) or
-                    (Expr.column("name") eq "1")
+                Expr.column("name") eq Expr.literal("A")
+                    Expr.column("id").isNotNull()
+                    Expr.column("id").isNotNull()
+                    Expr.column("name") eq "1"
             }
         }
 
@@ -132,8 +131,8 @@ class SqlDSLTest : MybatisBootstrap {
             "(((id=out_biz_id AND id=A) OR id=B))",
             sql(Wrappers.query<Any>()) {
                 where {
-                    (SampleDBO::id eq SampleDBO::outBizId) and
-                        (SampleDBO::id eq Expr.literal("A")) or
+                    (SampleDBO::id eq SampleDBO::outBizId)
+                        (SampleDBO::id eq Expr.literal("A"))
                         (SampleDBO::id eq Expr.literal("B"))
                 }
             }.sqlSegment,
@@ -146,8 +145,8 @@ class SqlDSLTest : MybatisBootstrap {
             "((id=out_biz_id OR id=#{ew.paramNameValuePairs.MPGENVAL1}))",
             sql(Wrappers.query<Any>()) {
                 where {
-                    (SampleDBO::id eq SampleDBO::outBizId) or
-                        (SampleDBO::id eq "1")
+                    (SampleDBO::id eq SampleDBO::outBizId)
+                        (+SampleDBO::id eq "1")
                 }
             }.sqlSegment,
         )

@@ -17,21 +17,24 @@ package com.github.ian4hu.mybatis.exposed.dsl
 
 import com.github.ian4hu.mybatis.exposed.Condition
 import com.github.ian4hu.mybatis.exposed.Expr
-import com.github.ian4hu.mybatis.exposed.eq
 import kotlin.reflect.KProperty1
 
 /**
  * A scope for where condition
  */
-class WhereDSL {
+class WhereDSL(val conditions: MutableList<Condition>) {
 
     operator fun String.unaryPlus(): Expr = Expr.column(this)
 
     inline operator fun <reified T> KProperty1<T, *>.unaryPlus(): Expr = Expr.kotlinProperty(this, T::class.java)
 
-    inline infix fun <reified T> KProperty1<T, *>.eq(b: Any): Condition = Expr.kotlinProperty(this).eq(b)
+    inline infix fun <reified T> KProperty1<T, *>.eq(b: Expr) = apply {  conditions.add(Expr.kotlinProperty(this).equalTo(b)) }
 
-    inline infix fun <reified T, reified O> KProperty1<T, *>.eq(b: KProperty1<O, *>): Condition = Expr.kotlinProperty(this).eq(b)
+    inline infix fun <reified T, reified O> KProperty1<T, *>.eq(b: KProperty1<O, *>) = apply {  conditions.add(Expr.kotlinProperty(this, T::class.java).equalTo(
+        Expr.kotlinProperty(b, O::class.java))) }
 
-    operator fun Condition.invoke(append: Condition.() -> Condition): Condition = append()
+
+    inline infix fun <reified O> Expr.eq(b: KProperty1<O, *>) = apply {  conditions.add(equalTo(Expr.kotlinProperty(b, O::class.java))) }
+
+    infix fun Expr.eq(b: Any) = apply {  if (b is Expr) conditions.add(equalTo(b)) else conditions.add(equalTo(Expr.variable(b))) }
 }

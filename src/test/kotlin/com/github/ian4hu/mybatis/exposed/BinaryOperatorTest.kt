@@ -151,7 +151,7 @@ class BinaryOperatorTest : MybatisBootstrap {
 
         // Test bitwise AND in logical AND
         val bitAnd = BinaryOp.BIT_AND.of(Expr.column("status"), Expr.constant(1))
-        val logicalAnd = bitAnd.and(Expr.column("active").eq(Expr.constant(true)))
+        val logicalAnd = bitAnd.and(Expr.column("active").equalTo(Expr.constant(true)))
         val result = logicalAnd.render(render)
         assertEquals("(status & 1) AND active=true", result)
     }

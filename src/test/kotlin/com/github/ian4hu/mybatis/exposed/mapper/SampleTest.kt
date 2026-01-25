@@ -20,7 +20,6 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers
 import com.github.ian4hu.mybatis.exposed.Expr
 import com.github.ian4hu.mybatis.exposed.MybatisBootstrap
 import com.github.ian4hu.mybatis.exposed.entity.SampleDBO
-import com.github.ian4hu.mybatis.exposed.eq
 import com.github.ian4hu.mybatis.exposed.render.addCondition
 import com.github.ian4hu.mybatis.exposed.render.addSelect
 import com.github.ian4hu.mybatis.exposed.render.and
@@ -66,9 +65,9 @@ class SampleTest : MybatisBootstrap {
             Expr.kotlinProperty(SampleDBO::type),
             concat(Expr.kotlinProperty(SampleDBO::sha256), ':', Expr.kotlinProperty(SampleDBO::type)).alias("out_biz_id"),
         )
-            .addCondition(Expr.kotlinProperty(SampleDBO::type).eq(Expr.variable("file")))
+            .addCondition(Expr.kotlinProperty(SampleDBO::type).equalTo(Expr.variable("file")))
             .and(Expr.kotlinProperty(SampleDBO::type).isNotNull())
-            .and(concat(Expr.kotlinProperty(SampleDBO::sha256), ':', Expr.kotlinProperty(SampleDBO::type)).eq(Expr.variable("${entity.sha256}:${entity.type}")))
+            .and(concat(Expr.kotlinProperty(SampleDBO::sha256), ':', Expr.kotlinProperty(SampleDBO::type)).equalTo(Expr.variable("${entity.sha256}:${entity.type}")))
             .or(Expr.kotlinProperty(SampleDBO::type).isNull())
         val savedEntity = sampleMapper.selectOne(queryWrapper)
         assertEquals(entity.sha256, savedEntity.sha256)
@@ -77,8 +76,8 @@ class SampleTest : MybatisBootstrap {
         assertEquals("id,sha256,type,concat(sha256,#{ew.paramNameValuePairs.MPGENVAL1},type) AS out_biz_id", queryWrapper.sqlSelect)
 
         queryWrapper.clearCondition()
-            .or(Expr.kotlinProperty(SampleDBO::type).isNotNull().and(Expr.kotlinProperty(SampleDBO::outBizId).eq(Expr.variable("file"))))
-            .or(Expr.kotlinProperty(SampleDBO::type).isNull().and(Expr.kotlinProperty(SampleDBO::outBizId).eq(Expr.variable("file"))))
+            .or(Expr.kotlinProperty(SampleDBO::type).isNotNull().and(Expr.kotlinProperty(SampleDBO::outBizId).equalTo(Expr.variable("file"))))
+            .or(Expr.kotlinProperty(SampleDBO::type).isNull().and(Expr.kotlinProperty(SampleDBO::outBizId).equalTo(Expr.variable("file"))))
         assertEquals("((type IS NOT NULL AND out_biz_id=#{ew.paramNameValuePairs.MPGENVAL5}) OR (type IS NULL AND out_biz_id=#{ew.paramNameValuePairs.MPGENVAL6}))", queryWrapper.sqlSegment)
     }
 }

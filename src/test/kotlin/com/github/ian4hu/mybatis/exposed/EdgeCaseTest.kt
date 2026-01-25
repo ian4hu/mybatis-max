@@ -350,8 +350,8 @@ class EdgeCaseTest : MybatisBootstrap {
         val complex = Expr.functionCall(
             "IF",
             Expr.column("age").ge(Expr.constant(18))
-                .and(Expr.column("verified").eq(Expr.constant(true)))
-                .or(Expr.column("role").eq(Expr.literal("ADMIN"))),
+                .and(Expr.column("verified").equalTo(Expr.constant(true)))
+                .or(Expr.column("role").equalTo(Expr.literal("ADMIN"))),
             Expr.constant("ALLOWED"),
             Expr.constant("DENIED"),
         ).alias("access_status")
@@ -369,7 +369,7 @@ class EdgeCaseTest : MybatisBootstrap {
         // Verify that operations create new instances
         val original = Expr.column("value")
         val withAlias = original.alias("val")
-        val withCondition = original.eq(Expr.constant(10))
+        val withCondition = original.equalTo(Expr.constant(10))
 
         // All should render differently
         assertEquals("value", original.render(render))

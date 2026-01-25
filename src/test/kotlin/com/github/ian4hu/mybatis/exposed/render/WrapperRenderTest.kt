@@ -19,7 +19,6 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers
 import com.github.ian4hu.mybatis.exposed.Condition
 import com.github.ian4hu.mybatis.exposed.Expr
 import com.github.ian4hu.mybatis.exposed.MybatisBootstrap
-import com.github.ian4hu.mybatis.exposed.eq
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -69,7 +68,7 @@ class WrapperRenderTest : MybatisBootstrap {
         wrapper.and(Condition.literal("E").or(Condition.literal("F")))
         assertEquals("((E OR F))", wrapper.sqlSegment)
 
-        wrapper.and(Expr.column("id").eq(Expr.literal("12")).and(Expr.column("username").eq(Expr.functionCall("current_timestamp"))))
+        wrapper.and(Expr.column("id").equalTo(Expr.literal("12")).and(Expr.column("username").equalTo(Expr.functionCall("current_timestamp"))))
         assertEquals("((E OR F) AND (id=12 AND username=current_timestamp()))", wrapper.sqlSegment)
     }
 }

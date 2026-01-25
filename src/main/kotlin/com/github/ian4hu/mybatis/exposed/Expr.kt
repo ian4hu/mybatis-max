@@ -160,4 +160,8 @@ interface Expr : Renderable {
     fun isNotBool(bool: Boolean?): Condition = isBool(bool).not()
 
     fun asCondition(): Condition = DummyCondition.of(this)
+
+    /** Creates an equality condition: `a = b` */
+    fun equalTo(b: Expr): Condition = ComparisonOp.EqualTo.of(this, b)
+
 }

@@ -145,13 +145,6 @@ interface Condition : Expr {
     }
 }
 
-/** Creates an equality condition: `a = b` */
-infix fun Expr.eq(b: Expr): Condition = ComparisonOp.EqualTo.of(this, b)
-
-inline infix fun <reified T> Expr.eq(b: KProperty1<T, *>) = ComparisonOp.EqualTo.of(this, Expr.kotlinProperty(b))
-
-infix fun Expr.eq(b: Any): Condition = if (b is Expr) ComparisonOp.EqualTo.of(this, b) else ComparisonOp.EqualTo.of(this, Expr.variable(b))
-
 /** Creates an inequality condition: `a <> b` */
 fun Expr.ne(b: Expr): Condition = ComparisonOp.NotEqualTo.of(this, b)
 

@@ -39,11 +39,13 @@ class SqlDSL {
 
     fun select(init: SelectDSL.() -> Unit) = SelectDSL(selectClause).apply(init)
 
-    fun where(init: WhereDSL.() -> Condition) {
+    fun where(init: WhereDSL.() -> Unit) {
         if (whereCondition.isNotEmpty()) {
             throw IllegalArgumentException("WHERE clause is specified twice.")
         }
-        whereCondition.add(WhereDSL().init())
+        val conditions = arrayListOf<Condition>()
+        WhereDSL(conditions).init()
+        whereCondition.addAll(conditions)
     }
 }
 
