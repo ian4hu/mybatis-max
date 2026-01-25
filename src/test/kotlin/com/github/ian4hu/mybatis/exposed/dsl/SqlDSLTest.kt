@@ -43,10 +43,9 @@ class SqlDSLTest : MybatisBootstrap {
             }
 
             where {
-                Expr.column("name") eq Expr.literal("A")
-                    Expr.column("id").isNotNull()
-                    Expr.column("id").isNotNull()
-                    Expr.column("name") eq "1"
+                Expr.column("name").equalTo(Expr.literal("A"))
+                    .and(Expr.column("id").isNotNull())
+                    .or(Expr.column("id").isNotNull()).or(Expr.column("name").equalTo(Expr.variable("1")))
             }
         }
 
@@ -96,7 +95,6 @@ class SqlDSLTest : MybatisBootstrap {
             sql {
                 where {
                     Expr.column("id").isNotNull()
-                    Expr.column("id").isNotNull()
                 }
                 where { Expr.column("name").isNotNull() }
             }
@@ -110,7 +108,7 @@ class SqlDSLTest : MybatisBootstrap {
             "(A=#{ew.paramNameValuePairs.MPGENVAL1})",
             sql(Wrappers.query<Any>()) {
                 where {
-                    +"A" eq "1"
+                    (+"A").equalTo(Expr.variable("1"))
                 }
             }.sqlSegment,
         )
@@ -119,7 +117,7 @@ class SqlDSLTest : MybatisBootstrap {
             "(id=#{ew.paramNameValuePairs.MPGENVAL1})",
             sql(Wrappers.query<Any>()) {
                 where {
-                    +SampleDBO::id eq "1"
+                    (+SampleDBO::id).equalTo(Expr.variable("1"))
                 }
             }.sqlSegment,
         )
@@ -131,9 +129,8 @@ class SqlDSLTest : MybatisBootstrap {
             "(((id=out_biz_id AND id=A) OR id=B))",
             sql(Wrappers.query<Any>()) {
                 where {
-                    (SampleDBO::id eq SampleDBO::outBizId)
-                        (SampleDBO::id eq Expr.literal("A"))
-                        (SampleDBO::id eq Expr.literal("B"))
+                    (+SampleDBO::id).equalTo(+SampleDBO::outBizId).and((+SampleDBO::id).equalTo(Expr.literal("A")))
+                        .or((+SampleDBO::id).equalTo(Expr.literal("B")))
                 }
             }.sqlSegment,
         )
@@ -145,8 +142,7 @@ class SqlDSLTest : MybatisBootstrap {
             "((id=out_biz_id OR id=#{ew.paramNameValuePairs.MPGENVAL1}))",
             sql(Wrappers.query<Any>()) {
                 where {
-                    (SampleDBO::id eq SampleDBO::outBizId)
-                        (+SampleDBO::id eq "1")
+                    (+SampleDBO::id).equalTo(+SampleDBO::outBizId).or((+SampleDBO::id).equalTo(Expr.variable("1")))
                 }
             }.sqlSegment,
         )
